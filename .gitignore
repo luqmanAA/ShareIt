@@ -1,0 +1,3 @@
+# ignore all virtual environment files
+.idea/
+__pycache__/
