@@ -1,7 +1,11 @@
 import uuid
 
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils.text import slugify
 from django.urls import reverse
+
 
 # Create your models here.
 
@@ -19,12 +23,28 @@ class HiddenObject(models.Manager):
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=200)
+    PRIVACY_CHOICES = (
+        ('public', 'Public'),
+        ('private', 'Private')
+    )
+
+    name = models.CharField(max_length=200, unique=True)
     description = models.TextField(null=True, blank=True)
     avatar = models.ImageField(upload_to='upload/group/', null=True, blank=True)
     cover_image = models.ImageField(upload_to='upload/group/', null=True, blank=True)
     owner = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='group')
     member = models.ManyToManyField('accounts.Account', related_name='group_member')
+    privacy = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default='public')
+    slug = models.SlugField(max_length=250, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+@receiver(pre_save, sender=Group)
+def slugify_name(sender, instance, **kwargs):
+    if instance.slug is None:
+        instance.slug = slugify(instance.name)
 
 
 class Post(models.Model):
@@ -62,7 +82,7 @@ class Comment(models.Model):
 class Reply(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
     content = models.TextField()
-    # author = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='reply')
+    author = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='reply')
     timestamp = models.DateTimeField(auto_now_add=True)
     is_hidden = models.BooleanField(default=False)
     likes = models.ManyToManyField('accounts.Account', related_name='reply_likes')

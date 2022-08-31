@@ -1263,3 +1263,17 @@ h6 {
   min-height: 100%;
 }
 
+.small-img {
+  max-width: 70px !important;
+  height: 70px !important;
+}
+
+.group-list .row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.vertical-center{
+  align-items: center;
+}
