@@ -37,6 +37,11 @@ class UserForm(forms.ModelForm):
         model = Account
         fields = ("first_name", "last_name", "phone_number")
 
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control"
+
 
 class UserProfileForm(forms.ModelForm):
     avatar = forms.ImageField(required=False, error_messages={"invalid": ("Image files only",)},
@@ -46,3 +51,9 @@ class UserProfileForm(forms.ModelForm):
         model = UserProfile
         fields = ("middle_name", "highest_qualification", "current_city", "state", "country",
                   "hometown", "avatar", "dob", "gender", "bio", "is_suspended")
+
+
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs["class"] = "form-control"

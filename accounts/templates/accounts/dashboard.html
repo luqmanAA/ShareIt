@@ -22,9 +22,10 @@
                     <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
 
                         <img src="
+
                                 {% if not user_profile.avatar %}{% static "img/default_avatar.png" %}{% else %}{{ user_profile.avatar.url }}{% endif %}"
                              alt="Profile" class="rounded-circle">
-                        <h2>{{  user.username }}</h2>
+                        <h2>{{ user.username }}</h2>
                         <h3>ShareIt User</h3>
                         <div class="social-links mt-2">
                             <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
@@ -73,7 +74,9 @@
 
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label ">Full Name</div>
-                                    <div class="col-lg-9 col-md-8">{{ user_profile.user.first_name }} {{ user_profile.user.last_name }} {{ user_profile.middle_nmae }}</div>
+                                    <div class="col-lg-9 col-md-8">{{ user_profile.user.first_name|default_if_none:"" }}
+                                        {{ user_profile.user.last_name|default_if_none:"" }}
+                                        {{ user_profile.middle_name|default_if_none:"" }}</div>
                                 </div>
 
                                 <div class="row">
@@ -83,7 +86,7 @@
 
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label">Date of Birth</div>
-                                    <div class="col-lg-9 col-md-8">Web {{ user_profile.dob }}</div>
+                                    <div class="col-lg-9 col-md-8">{{ user_profile.dob|default_if_none:"" }}</div>
                                 </div>
 
                                 <div class="row">
@@ -93,7 +96,7 @@
 
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label">Home Town</div>
-                                    <div class="col-lg-9 col-md-8">{{ user_profile.hometown }}</div>
+                                    <div class="col-lg-9 col-md-8">{{ user_profile.hometown|default_if_none:"" }}</div>
                                 </div>
 
                                 <div class="row">
@@ -122,14 +125,16 @@
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label for="fullName" class="col-md-4 col-lg-3 col-form-label">First Name</label>
+                                        <label for="fullName" class="col-md-4 col-lg-3 col-form-label">First
+                                            Name</label>
                                         <div class="col-md-8 col-lg-9">
                                             {{ user_form.first_name }}
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Middle Name</label>
+                                        <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Middle
+                                            Name</label>
                                         <div class="col-md-8 col-lg-9">
                                             {{ profile_form.middle_name }}
                                         </div>
@@ -150,7 +155,8 @@
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label for="company" class="col-md-4 col-lg-3 col-form-label">Highest Qualification</label>
+                                        <label for="company" class="col-md-4 col-lg-3 col-form-label">Highest
+                                            Qualification</label>
                                         <div class="col-md-8 col-lg-9">
                                             {{ profile_form.highest_qualification }}
                                         </div>
@@ -180,21 +186,14 @@
                                     <div class="row mb-3">
                                         <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Phone</label>
                                         <div class="col-md-8 col-lg-9">
-                                            {{ user_form.phone }}
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label for="Email" class="col-md-4 col-lg-3 col-form-label">Email</label>
-                                        <div class="col-md-8 col-lg-9">
-                                            {{ user_form.email }}
+                                            {{ user_form.phone_number }}
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
                                         <label for="Email" class="col-md-4 col-lg-3 col-form-label">Gender</label>
                                         <div class="col-md-8 col-lg-9">
-                                            {{ user_form.gender }}
+                                            {{ profile_form.gender }}
                                         </div>
                                     </div>
 
