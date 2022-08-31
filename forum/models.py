@@ -82,7 +82,7 @@ class Comment(models.Model):
 class Reply(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
     content = models.TextField()
-    # author = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='reply')
+    author = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='reply')
     timestamp = models.DateTimeField(auto_now_add=True)
     is_hidden = models.BooleanField(default=False)
     likes = models.ManyToManyField('accounts.Account', related_name='reply_likes')
