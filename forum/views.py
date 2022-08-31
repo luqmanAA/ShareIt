@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import DetailView, ListView
@@ -13,8 +14,15 @@ class FeedView(View):
         return render(request, 'forum/index.html')
 
 
-class CreateGroupView(CreateView):
+class CreateGroupView(LoginRequiredMixin, CreateView):
     model = Group
+    fields = ('name', 'description', 'avatar', 'privacy')
+
+    def form_valid(self, form):
+        form.save(commit=False)
+        form.instance.owner_id = self.request.user.id
+        form.save()
+        return super().form_valid(form)
 
 
 class EditGroupView(UpdateView):

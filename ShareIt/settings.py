@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'forum',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -70,7 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ShareIt.wsgi.application'
-
+AUTH_USER_MODEL = 'accounts.Account'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -130,3 +131,10 @@ MEDIA_ROOT = BASE_DIR / 'ShareIt' / 'media'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# SMTP configuration
+EMAIL_HOST = "smtp.mailtrap.io"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "daf32b31bf6726"
+EMAIL_HOST_PASSWORD = "4f1e7d865ad6f9"
+EMAIL_USE_TLS = True
