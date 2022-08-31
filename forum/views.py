@@ -1,5 +1,5 @@
-# from django.shortcuts import render
-# from django.views import View
+from django.shortcuts import render
+from django.views import View
 # from django.views.generic import DetailView, ListView
 # from django.views.generic.edit import CreateView, UpdateView
 #
@@ -7,10 +7,10 @@
 # # Create your views here.
 #
 #
-# class FeedView(View):
+class FeedView(View):
 #
-#     def get(self, request):
-#         return render(request, 'forum/index.html')
+    def get(self, request):
+        return render(request, 'forum/index.html')
 #
 #
 # class CreateGroupView(CreateView):

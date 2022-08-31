@@ -2,8 +2,18 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
+class ActiveUser(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_suspended=False)
+
+
+class Suspendeduser(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_suspended=True)
+
+
 class MyAccountManager(BaseUserManager):
-    def create_user(self,  username, email, first_name=None, last_name=None, password=None):
+    def create_user(self, username, email, first_name=None, last_name=None, password=None):
         # check that user has email and username
         if not email:
             raise ValueError("User must have an email address")
@@ -90,19 +100,21 @@ class UserProfile(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
     middle_name = models.CharField(max_length=50, null=True, blank=True)
     avatar = models.ImageField(blank=True, upload_to="userprofile")
-    city = models.CharField(blank=True, max_length=20)
+    current_city = models.CharField(max_length=50, null=True, blank=True)
     state = models.CharField(blank=True, max_length=20)
     country = models.CharField(blank=True, max_length=20)
     highest_qualification = models.CharField(max_length=20, choices=highest_qualification_choice)
     hometown = models.CharField(max_length=30, null=True, blank=True)
-    current_city = models.CharField(max_length=30, null=True, blank=True)
     dob = models.DateField(null=True, blank=True)
     gender = models.IntegerField(null=True, blank=True)
     bio = models.TextField(max_length=200, blank=True)
     is_suspended = models.BooleanField(default=False)
 
+    suspended_user = Suspendeduser
+    objects = ActiveUser
+
     def __str__(self):
-        return f"{self.user.firstname}"
+        return f"{self.user.username}"
 
     def full_address(self):
-        return f"{self.user.firstname}"
+        return f"{self.user.username}"
