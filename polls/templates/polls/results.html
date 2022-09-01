@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div class="pagetitle">
+        <h1>ShareIt</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url "forum:home" %}">Home</a></li>
+                <li class="breadcrumb-item">Polls</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Result for Poll: {{ poll.poll_text }}</h5>
+
+                        <!-- List group with active and disabled items -->
+                        <ul class="list-group">
+                            {% for choice in poll.choice_set.all %}
+                                {% if choice.choice_text != '' %}
+                                    <li class="list-group-item">{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                        <div class="text-center">
+                            <a href="{% url 'polls:poll-list' %}">Vote again?</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
