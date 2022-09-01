@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="main_content" style="margin-left: 0px;">
+        <div class="mcontainer">
+            <div class="mb-6">
+                <h2 class="text-2xl font-semibold"> Edit {{ group }} </h2>
+            </div>
+{#            <div class="grid lg:grid-cols-3 mt-12 gap-8">#}
+{#                    <div class="bg-white rounded-md lg:shadow-md shadow col-span-2 lg:mx-16">#}
+{#                        <form method="post" enctype="multipart/form-data">#}
+{#                            {% csrf_token %}#}
+{#                        <div class="grid grid-cols-2 gap-3 lg:p-6 p-4">#}
+{#                            <div class="col-span-2">#}
+{#                                <label for="id_name">Name:</label>#}
+{#                                <input type="text" name="name" value="ATS Backend" maxlength="200"#}
+{#                                       required="" id="id_name" class="shadow-none with-border">#}
+{#                            </div>#}
+{##}
+{#                             <div class="col-span-2">#}
+{#                                 <label for="id_description">Description:</label>#}
+{#                                 <textarea name="description" cols="40" rows="3"#}
+{#                                           id="id_description" class="with-border"></textarea>#}
+{#                             </div>#}
+{#                            <div>#}
+{#                                <label for="id_avatar">Avatar:</label>#}
+{#                                    Currently: <a href="{{group.avatar.url}}">upload/group/django_lnAVvhQ.png</a>#}
+{#                                <input type="checkbox" name="avatar-clear" id="avatar-clear_id">#}
+{#                                <label for="avatar-clear_id">Clear</label><br>#}
+{#                                Change:#}
+{#                                <input type="file" name="avatar" accept="image/*" id="id_avatar">#}
+{#                            </div>#}
+{##}
+{#                            <div>#}
+{#                                <label for="id_cover_image">Cover image:</label>#}
+{#                                <input type="file" name="cover_image" accept="image/*" id="id_cover_image">#}
+{#                            </div>#}
+{##}
+{#                             <div class="col-span-2">#}
+{#                                 <label for=""> Location</label>#}
+{#                                 <input type="text" placeholder="" class="shadow-none with-border">#}
+{#                             </div>#}
+{#                             <div>#}
+{#                                <label for=""> Working at</label>#}
+{#                                <input type="text" placeholder="" class="shadow-none with-border">#}
+{#                             </div>#}
+{#                             <div>#}
+{#                                <label for="id_privacy">Privacy:</label>#}
+{#                                <select name="privacy" id="id_privacy">#}
+{#                                  <option value="public">Public</option>#}
+{#                                  <option value="private" selected="">Private</option>#}
+{#                                </select>#}
+{#                             </div>#}
+{#                        </div>#}
+{##}
+{#                        <div class="bg-gray-10 p-6 pt-0 flex justify-end space-x-3">#}
+{#                            <button class="p-2 px-4 rounded bg-gray-50 text-red-500"> Cancel </button>#}
+{#                            <button type="button" class="button bg-blue-700"> Save </button>#}
+{#                        </div>#}
+{#                        </form>#}
+{#                     </div>#}
+{##}
+{#                </div>#}
+            <div class="grid lg:grid-cols-3 mt-12 gap-8">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" value="Save">
+
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

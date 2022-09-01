@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% load static %}
+
+    <section class="section dashboard">
+        <div class="row">
+
+            <div class="col-8 mcontainer">
+
+                <!-- Profile cover -->
+                <div class="profile user-profile">
+
+                    <div class="profiles_banner">
+                        <img src="{% if group.cover_image %}
+                            {{ group.cover_image.url }}
+                            {% else %}
+                            {% static 'img/cover_image_placeholder.jpg' %}
+                            {% endif %}" alt="">
+                        <div class="profile_action absolute bottom-0 right-0 space-x-1.5 p-3 text-sm z-50 hidden lg:flex">
+                            {% if request.user == group.owner %}
+                                <a href="{% url 'forum:group-edit' group.slug %}"
+                                   class="flex items-center justify-center h-8 px-3 rounded-md bg-gray-700 bg-opacity-70 text-white space-x-1.5">
+                                    <ion-icon name="create-outline" class="text-xl md hydrated" role="img"
+                                              aria-label="create outline"></ion-icon>
+                                    <span> Edit </span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="profiles_content">
+
+                        <div class="profile_avatar">
+                            <div class="profile_avatar_holder">
+                                <img src="{{ group.avatar.url }}" alt="">
+                            </div>
+                            <div class="user_status status_online"></div>
+                            <div class="icon_change_photo" hidden="">
+                                <ion-icon name="camera" class="text-xl md hydrated" role="img"
+                                          aria-label="camera"></ion-icon>
+                            </div>
+                        </div>
+
+                        <div class="profile_info">
+                            <h1> {{ group.name }} </h1>
+                            <p> {{ group.privacy | title }} Group | {{ group.member.count }} members</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            {% if request.user != group.owner or request.user not in group.member.all %}
+                                <form method="post" action="{% url 'forum:join-leave' group.slug request.user.id%}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                       class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                             class="w-5">
+                                        <path fill-rule="evenodd"
+                                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                                              clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span> Join </span>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="post" action="{% url 'forum:join-leave' group.slug request.user.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                       class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                             class="w-5">
+                                            <path fill-rule="evenodd"
+                                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                                                  clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span> Leave </span>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+{#                    <div class="flex justify-between lg:border-t border-gray-100 flex-col-reverse lg:flex-row pt-2">#}
+{#                        <nav class="responsive-nav pl-3">#}
+{#                            <ul uk-switcher="connect: #timeline-tab; animation: uk-animation-fade">#}
+{#                                <li><a href="#" aria-expanded="false">Discussions</a></li>#}
+{#                                <li class="uk-active"><a href="#" aria-expanded="true">About</a></li>#}
+{#                                <li><a href="#" aria-expanded="false">Events</a></li>#}
+{#                            </ul>#}
+{#                        </nav>#}
+{##}
+{#                    </div>#}
+
+                </div>
+
+                <div class="uk-switcher lg:mt-8 mt-4" id="timeline-tab" style="touch-action: pan-y pinch-zoom;">
+
+                    <!-- Timeline -->
+                    <div class="md:flex md:space-x-6 uk-active">
+
+
+                            {% block group-body %}
+                            
+                            {% endblock %}
+                        <!-- Sidebar -->
+                        <div class="w-full space-y-6">
+
+                            <div class="widget card p-5">
+                                <h4 class="text-lg font-semibold"> About </h4>
+                                <ul class="text-gray-600 space-y-3 mt-3">
+                                    <li class="flex items-center space-x-2">
+                                        <ion-icon name="person"
+                                                  class="rounded-full bg-gray-200 text-xl p-1 mr-3 md hydrated"
+                                                  role="img" aria-label="home sharp"></ion-icon>
+                                        Admin: <strong>
+                                        {{ group.admin.count }}
+                                    </strong>
+                                    </li>
+                                    <li class="flex items-center space-x-2">
+                                        <ion-icon name="people"
+                                                  class="rounded-full bg-gray-200 text-xl p-1 mr-3 md hydrated"
+                                                  role="img" aria-label="logo rss"></ion-icon>
+                                        Members: <strong> {{ group.member.count }} </strong>
+                                    </li>
+                                </ul>
+                                <div class="gap-3 grid grid-cols-3 mt-4">
+                                    <img src="assets/images/avatars/avatar-lg-2.jpg" alt=""
+                                         class="object-cover rounded-lg col-span-full">
+                                    <img src="assets/images/avatars/avatar-2.jpg" alt="" class="rounded-lg">
+                                    <img src="assets/images/avatars/avatar-4.jpg" alt="" class="rounded-lg">
+                                    <img src="assets/images/avatars/avatar-5.jpg" alt="" class="rounded-lg">
+                                </div>
+                                {% if request.user == group.owner  %}
+                                <a href="{% url 'forum:group-edit' group.slug %}" class="button gray mt-3 w-full"> Edit </a>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+    </section>
+
+{% endblock %}
