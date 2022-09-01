@@ -197,7 +197,19 @@ class DashboardView(DetailView):
         return render(request, "accounts/dashboard.html", context)
 
 
+class UserProfileView(DetailView):
+    @method_decorator(login_required(login_url="accounts:login"))
+    def get(self, request, pk):
+        user_profile, _ = UserProfile.objects.get_or_create(user_id=pk)
+
+        context = {
+            "user_profile": user_profile,
+        }
+        return render(request, "accounts/user_profile.html", context)
+
+
 class ProfileEditView(View):
+
     def post(self, request):
         user_profile = get_object_or_404(UserProfile, user=request.user)
         user_form = UserForm(request.POST, instance=request.user)
@@ -207,14 +219,15 @@ class ProfileEditView(View):
             user_form.save()
             profile_form.save()
             messages.success(request, "Your profile has been updated.")
-            return redirect("accounts:edit_profile")
+            return redirect("accounts:dashboard")
 
         context = {
             "user_form": user_form,
             "profile_form": profile_form,
             "user_profile": user_profile,
         }
-        return render(request, "accounts/edit_profile.html", context)
+        messages.error(request, "Form not valid")
+        return render(request, "accounts/dashboard.html", context)
 
 
 class ChangePasswordView(View):

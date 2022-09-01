@@ -45,15 +45,16 @@ class UserForm(forms.ModelForm):
 
 class UserProfileForm(forms.ModelForm):
     avatar = forms.ImageField(required=False, error_messages={"invalid": ("Image files only",)},
-                                       widget=forms.FileInput)
+                              widget=forms.FileInput)
+
 
     class Meta:
         model = UserProfile
         fields = ("middle_name", "highest_qualification", "current_city", "state", "country",
-                  "hometown", "avatar", "dob", "gender", "bio", "is_suspended")
-
+                  "hometown", "avatar", "dob", "gender", "bio")
 
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
+        self.fields["dob"].widget.attrs["placeholder"] = "dd/mm/yyyy"
         for field in self.fields:
             self.fields[field].widget.attrs["class"] = "form-control"

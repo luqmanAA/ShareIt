@@ -23,6 +23,7 @@
 
                         <img src="
 
+
                                 {% if not user_profile.avatar %}{% static "img/default_avatar.png" %}{% else %}{{ user_profile.avatar.url }}{% endif %}"
                              alt="Profile" class="rounded-circle">
                         <h2>{{ user.username }}</h2>
@@ -75,8 +76,8 @@
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label ">Full Name</div>
                                     <div class="col-lg-9 col-md-8">{{ user_profile.user.first_name|default_if_none:"" }}
-                                        {{ user_profile.user.last_name|default_if_none:"" }}
-                                        {{ user_profile.middle_name|default_if_none:"" }}</div>
+                                        {{ user_profile.middle_name|default_if_none:"" }}
+                                        {{ user_profile.user.last_name|default_if_none:"" }}</div>
                                 </div>
 
                                 <div class="row">
@@ -101,12 +102,12 @@
 
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label">Phone</div>
-                                    <div class="col-lg-9 col-md-8">{{ user.phone_number }}</div>
+                                    <div class="col-lg-9 col-md-8">{{ user_profile.user.phone_number }}</div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label">Email</div>
-                                    <div class="col-lg-9 col-md-8">{{ user.email }}</div>
+                                    <div class="col-lg-9 col-md-8">{{ user_profile.user.email }}</div>
                                 </div>
 
                             </div>
@@ -115,6 +116,7 @@
 
                                 <!-- Profile Edit Form -->
                                 <form method="post" action="{% url "accounts:edit_profile" %}">
+                                    {% csrf_token %}
                                     <div class="row mb-3">
                                         <label for="profileImage" class="col-md-4 col-lg-3 col-form-label">Profile
                                             Image</label>
@@ -184,16 +186,24 @@
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Phone</label>
+                                        <label for="phone" class="col-md-4 col-lg-3 col-form-label">Phone</label>
                                         <div class="col-md-8 col-lg-9">
                                             {{ user_form.phone_number }}
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label for="Email" class="col-md-4 col-lg-3 col-form-label">Gender</label>
+                                        <label for="gender" class="col-md-4 col-lg-3 col-form-label">Gender</label>
                                         <div class="col-md-8 col-lg-9">
                                             {{ profile_form.gender }}
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label for="inputDate" class="col-md-4 col-lg-3 col-form-label">Date of
+                                            Birth</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            {{ profile_form.dob }}
                                         </div>
                                     </div>
 
