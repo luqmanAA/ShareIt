@@ -19,6 +19,9 @@
           rel="stylesheet">
 
     <!-- Vendor CSS Files -->
+    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/tailwind.min.css' %}">
     <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
@@ -222,7 +225,7 @@
 </main><!-- End #main -->
 
 <!-- ======= Footer ======= -->
-<footer id="footer" class="footer fixed-bottom">
+<footer id="footer" class="footer">
     <div class="copyright">
         &copy; {% now 'Y' %} Copyright <strong><span>ShareIt</span></strong>. All Rights Reserved
     </div>
@@ -246,7 +249,13 @@
 <script src="{% static 'vendor/quill/quill.min.js' %}"></script>
 <script src="{% static 'vendor/simple-datatables/simple-datatables.js' %}"></script>
 <script src="{% static 'vendor/tinymce/tinymce.min.js' %}"></script>
-<script src="{% static 'vendor/php-email-form/validate.js' %}"></script>
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
+<script src="{% static 'assets/js/uikit.js' %}"></script>
+<script src="{% static 'assets/js/simplebar.js' %}"></script>
+<script src="{% static 'assets/js/custom.js' %}"></script>
+<script src="{% static 'assets/js/bootstrap-select.min.js' %}"></script>
+<script src="https://unpkg.com/ionicons@5.2.3/dist/ionicons.js"></script>
 
 <!-- Template Main JS File -->
 <script src="{% static 'js/main.js' %}"></script>

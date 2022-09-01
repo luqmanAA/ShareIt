@@ -1277,3 +1277,7 @@ h6 {
 .vertical-center{
   align-items: center;
 }
+
+.post-attachment {
+  display: none;
+}
