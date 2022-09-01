@@ -1281,3 +1281,7 @@ h6 {
 .post-attachment {
   display: none;
 }
+
+input[type="text"]{
+  border: 1px solid #ccc;
+}

@@ -12,7 +12,7 @@ class Poll(models.Model):
     poll_text = models.CharField(max_length=200, null=True)
     created_date = models.DateTimeField(auto_now_add=True, editable=False)
     poll_author = models.ForeignKey(Account, on_delete=models.CASCADE, editable=False)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, related_name='polls')
 
     def was_published_recently(self):
         now = timezone.now()

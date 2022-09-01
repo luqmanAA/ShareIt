@@ -29,7 +29,7 @@
                             {% endfor %}
                         </ul>
                         <div class="text-center">
-                            <a href="{% url 'polls:poll-list' %}">Vote again?</a>
+                            <a href="{% url 'forum:polls' poll.group.slug%}">Vote again?</a>
                         </div>
                     </div>
                 </div>

@@ -16,7 +16,7 @@ from .models import Comment, Group, Post, Reply
 # Create your views here.
 
 
-class FeedView(View):
+class FeedView(LoginRequiredMixin, View):
 
     def get(self, request):
         return render(request, 'forum/index.html')
@@ -60,7 +60,6 @@ class JoinLeaveGroupView(View):
                 f"You're no longer a member {group.name}"
             )
         else:
-            group.admin.add(request.user)
             group.member.add(request.user)
             messages.add_message(
                 self.request,

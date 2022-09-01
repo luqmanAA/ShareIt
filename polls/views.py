@@ -3,31 +3,45 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import generic, View
 
+from forum.models import Group
+
 from .forms import PollForm, ChoiceForm
 from .models import Poll, Choice
 
 
-class PollListVIew(View):
-    def get(self, request):
-        polls = Poll.objects.order_by('-created_date')[:5]
-        print(polls)
-        context = {
-            "polls": polls
-        }
+class PollListVIew(generic.ListView):
+    model = Poll
+    template_name = 'polls/polls_list.html'
 
-        return render(request, "polls/polls_list.html", context)
+    def get_queryset(self):
+        group = Group.objects.filter(slug=self.kwargs['slug']).first()
+        return Poll.objects.filter(group=group)
+
+    # # def get(self, request, ):
+    # #     polls = Poll.objects.order_by('-created_date')[:5]
+    # #     print(polls)
+    # #     context = {
+    # #         "polls": polls
+    # #     }
+    #
+    #     return render(request, "polls/polls_list.html", context)
 
 
 class PollCreateView(View):
-    def get(self, request):
-        return render(request, "polls/poll_create_view.html")
+    def get(self, request, slug):
+        context = {'slug':slug}
+        return render(request,
+                      "polls/poll_create_view.html",
+                      context=context)
 
-    def post(self, request):
+    def post(self, request, slug):
         poll_form = PollForm(request.POST)
         choice_form = ChoiceForm(request.POST)
         if poll_form.is_valid() and choice_form.is_valid():
+            group = Group.objects.filter(slug=slug).first()
             data = Poll()
             data.poll_text = poll_form.cleaned_data["poll_text"]
+            data.group = group
             data.poll_author = request.user
             data.save()
 
@@ -51,9 +65,20 @@ class PollCreateView(View):
             return render(request, "polls/poll_create_view.html", context)
 
 
-class DetailView(generic.DetailView):
-    model = Poll
-    template_name = 'polls/polls_detail.html'
+class PollDetailView(View):
+    # model = Poll
+    # template_name = 'polls/polls_detail.html'
+
+    def get(self, request, slug, pk, **kwargs):
+        poll = Poll.objects.filter(id=pk).first()
+        context = {'poll': poll}
+        return render(
+            request,
+            'polls/polls_detail.html',
+            context
+        )
+
+
 
 
 class ResultsView(generic.DetailView):

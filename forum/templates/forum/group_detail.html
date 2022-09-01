@@ -45,28 +45,22 @@
                             <p> {{ group.privacy | title }} Group | {{ group.member.count }} members</p>
                         </div>
                         <div class="flex items-center space-x-4">
-                            {% if request.user != group.owner or request.user in group.member.all %}
-                                <a href="{% url 'forum:join-leave' group.slug %}"
+                            {% if request.user not in group.member.all %}
+                                <form method="post" action="{% url 'forum:join-leave' group.slug request.user.id %}">
+                                {% csrf_token %}
+                                <button type="submit"
                                    class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                         class="w-5">
-                                        <path fill-rule="evenodd"
-                                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                                              clip-rule="evenodd"></path>
-                                    </svg>
                                     <span> Join </span>
-                                </a>
+                                </button>
+                                </form>
                             {% else %}
-                                <a href="{% url 'forum:join-leave' group.slug %}"
+                                <form method="post" action="{% url 'forum:join-leave' group.slug request.user.id %}">
+                                {% csrf_token %}
+                                <button type="submit"
                                    class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                         class="w-5">
-                                        <path fill-rule="evenodd"
-                                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                                              clip-rule="evenodd"></path>
-                                    </svg>
                                     <span> Leave </span>
-                                </a>
+                                </button>
+                                </form>
                             {% endif %}
                         </div>
 
@@ -74,9 +68,9 @@
 
 {#                    <div class="flex justify-between lg:border-t border-gray-100 flex-col-reverse lg:flex-row pt-2">#}
 {#                        <nav class="responsive-nav pl-3">#}
-{#                            <ul uk-switcher="connect: #timeline-tab; animation: uk-animation-fade">#}
+{#                            <ul uk-switcher="">#}
 {#                                <li><a href="#" aria-expanded="false">Discussions</a></li>#}
-{#                                <li class="uk-active"><a href="#" aria-expanded="true">About</a></li>#}
+{#                                <li><a href="{% url 'forum:polls' %}" >Polls</a></li>#}
 {#                                <li><a href="#" aria-expanded="false">Events</a></li>#}
 {#                            </ul>#}
 {#                        </nav>#}
@@ -86,13 +80,14 @@
                 </div>
 
                 <div class="uk-switcher lg:mt-8 mt-4" id="timeline-tab" style="touch-action: pan-y pinch-zoom;">
-
                     <!-- Timeline -->
                     <div class="md:flex md:space-x-6 uk-active">
                         <div class="space-y-5 flex-shrink-0 md:w-7/12">
 
+
                             <!-- create post  -->
                             <div class="card lg:mx-0 p-4" uk-toggle="target: #create-post-modal">
+                            {% include 'message.html' %}
                                 <div class="flex space-x-3">
                                     <img src="
                                    {% if request.user.image %}
@@ -102,7 +97,7 @@
                                          class="w-10 h-10 rounded-full">
                                     <input placeholder="What's  on your mind ?
                                         {% if request.user.first_name %}
-                                        {{ request.user.first_name }}
+                                        {{ request.user.first_name }} {{ request.user.lasst_name }}
                                         {% endif %}"
                                            class="bg-gray-100 hover:bg-gray-200 flex-1 h-10 px-6 rounded-full">
                                 </div>
@@ -119,6 +114,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             {% for post in group.posts.all %}
                                 <div class="card lg:mx-0 uk-animation-slide-bottom-small">
 
@@ -133,7 +129,11 @@
                                             <h5>
                                                 <a href="{% url 'accounts:dashboard' %}"
                                                    class="text-black dark:text-gray-100">
+                                                    {% if post.author.first_name %}
                                                     {{ post.author.first_name }}
+                                                    {% else %}
+                                                        {{ post.author.username }}
+                                                    {% endif %}
                                                 </a>
                                             </h5>
                                             <div class="flex items-center space-x-2">
@@ -354,6 +354,29 @@
                                 </div>
                                 {% if request.user == group.owner  %}
                                 <a href="{% url 'forum:group-edit' group.slug %}" class="button gray mt-3 w-full"> Edit </a>
+                                {% endif %}
+                            </div>
+
+                            <div class="widget card p-5">
+                                <div class="row">
+                                    <h4 class="text-lg font-semibold col-6" > Polls </h4>
+                                    <a class="font-regular col-6" href="{% url 'forum:create-poll' group.slug %}">
+                                        Add Poll </a>
+                                </div>
+
+                                <ul class="text-gray-600 space-y-3 mt-3">
+                                    {% for poll in group.polls.all %}
+                                    <li class="flex items-center space-x-2">
+                                        <a href="{% url 'forum:poll' group.slug poll.id %}">{{ poll.poll_text }}</a>
+                                    </li>
+                                    {% empty %}
+                                    <p>No polls yet</p>
+                                    {% endfor %}
+                                </ul>
+                                {% if request.user == group.owner  %}
+                                <a href="{% url 'forum:polls' group.slug %}" class="button gray mt-3 w-full">
+                                    All Polls
+                                </a>
                                 {% endif %}
                             </div>
 
