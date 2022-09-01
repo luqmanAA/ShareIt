@@ -1,5 +1,7 @@
 from django.urls import path
 
+from polls.views import PollCreateView, PollDetailView, PollListVIew
+
 from .views import (
     CreateCommentView, CreatePostView, CreateGroupView, CreateReplyView,
     EditGroupView, FeedView, GroupListView, GroupDetailView,
@@ -13,6 +15,9 @@ urlpatterns = [
     path('', FeedView.as_view(), name='home'),
     path('group/create', CreateGroupView.as_view(), name='group-create'),
     path('groups', GroupListView.as_view(), name='groups'),
+    path('group/<slug:slug>/polls', PollListVIew.as_view(), name='polls'),
+    path('group/<slug:slug>/polls/create', PollCreateView.as_view(), name='create-poll'),
+    path('group/<slug:slug>/poll/<int:pk>/detail', PollDetailView.as_view(), name='poll'),
     path('group/<slug:slug>', GroupDetailView.as_view(), name='group-detail'),
     path('group/<slug:slug>/edit', EditGroupView.as_view(), name='group-edit'),
     path('group/<slug:slug>/members', MemberListVIew.as_view(), name='members'),
@@ -38,5 +43,6 @@ urlpatterns = [
          ),
     path('group/<slug:slug>/members/<int:pk>/suspend', SuspendMemberView.as_view(), name='suspend-member'),
     path('group/<slug:slug>/members/<int:pk>/make-admin', MakeAdminView.as_view(), name='make-admin'),
+    path('group/polls', PollListVIew.as_view(), name='polls'),
 
 ]
