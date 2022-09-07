@@ -58,7 +58,12 @@
                                                     <a class="flex items-center px-3 py-2 hover:bg-gray-200 hover:text-gray-800
                                                     rounded-md dark:hover:bg-gray-800" >
                                                         <button type="submit" >
-                                                            <i class="uil-user-plus mr-1"></i>Make Admin
+                                                            <i class="uil-user-plus mr-1"></i>
+                                                            {% if membership.user in group.admin.all %}
+                                                                Unmake Admin
+                                                                {% else %}
+                                                                Make Admin
+                                                            {% endif %}
                                                         </button>
                                                     </a>
                                                 </form>
@@ -118,7 +123,7 @@
         {% if request.user in group.admin.all %}
         <div class="widget card p-4 visible-card suspended-member">
             <div class="row">
-                <h4 class="text-lg font-semibold" >Suspened Members </h4>
+                <h4 class="text-lg font-semibold" >Suspended Members </h4>
             </div>
 
             <ul class="text-gray-600 space-y-3 mt-3">
@@ -206,7 +211,7 @@
                         {% endif %}
                     </div>
                 {% empty %}
-                    <p>No one has been suspened yet</p>
+                    <p>No one has been suspended yet</p>
                 {% endfor %}
             </ul>
         </div>
