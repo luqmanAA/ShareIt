@@ -1,5 +1,4 @@
 import uuid
-from autoslug import AutoSlugField
 
 from django.db import models
 from django.db.models.signals import pre_save
@@ -34,7 +33,7 @@ class Group(models.Model):
     avatar = models.ImageField(upload_to='upload/group/', null=True, blank=True)
     cover_image = models.ImageField(upload_to='upload/group/', null=True, blank=True)
     owner = models.ForeignKey('accounts.Account', on_delete=models.CASCADE, related_name='group')
-    member = models.ManyToManyField('accounts.Account', related_name='group_member')
+    # member = models.ManyToManyField('accounts.Account', related_name='group_member')
     privacy = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default='public')
     slug = models.SlugField(max_length=250, unique=True)
     admin = models.ManyToManyField('accounts.Account', related_name='admin')
@@ -46,7 +45,7 @@ class Group(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('forum:groups')
+        return reverse('forum:group-detail', args=[self.slug])
 
 
 @receiver(pre_save, sender=Group)
@@ -75,7 +74,9 @@ class Post(models.Model):
         ordering = ['-timestamp']
 
     def __str__(self):
-        return self.title
+        if self.title:
+            return self.title
+        return self.content
 
     def get_absolute_url(self):
         """Returns the URL to access a detail record for this book."""
@@ -89,19 +90,17 @@ class Comment(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     is_hidden = models.BooleanField(default=False)
     likes = models.ManyToManyField('accounts.Account', related_name='comment_likes')
-    slug = AutoSlugField(populate_from=id, max_length=300)
+
+    active_objects = ActiveObject()
+    deleted_objects = HiddenObject()
+
+    objects = models.Manager()
 
     class Meta:
         ordering = ['-timestamp']
 
     def __str__(self):
         return self.content
-
-
-@receiver(pre_save, sender=Comment)
-def slugify_name(sender, instance, **kwargs):
-    # if instance.slug is None:
-    instance.slug += slugify(instance.content)
 
 
 class Reply(models.Model):
@@ -112,5 +111,30 @@ class Reply(models.Model):
     is_hidden = models.BooleanField(default=False)
     likes = models.ManyToManyField('accounts.Account', related_name='reply_likes')
 
+    active_objects = ActiveObject()
+    deleted_objects = HiddenObject()
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ['-timestamp']
+
     def __str__(self):
         return self.content
+
+
+class Membership(models.Model):
+    is_suspended = models.BooleanField(default=False)
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+        related_name='member'
+    )
+    user = models.ForeignKey(
+        'accounts.Account',
+        on_delete=models.CASCADE,
+        related_name='group_membership'
+    )
+
+    def __str__(self):
+        return f"{self.user} in {self.group}"

@@ -1285,3 +1285,25 @@ h6 {
 input[type="text"]{
   border: 1px solid #ccc;
 }
+
+.options a {
+  color: #000;
+}
+
+.options ul {
+  padding: 0;
+}
+
+.options button {
+  padding: 0;
+  color: #000;
+}
+
+.suspended-member ul, .drop-down ul {
+  padding: 0;
+  margin: 0;
+}
+
+.visible-card {
+  overflow: visible;
+}
