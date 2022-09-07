@@ -34,7 +34,9 @@
 
                         <div class="profile_avatar">
                             <div class="profile_avatar_holder">
+                                {% if group.avatar %}
                                 <img src="{{ group.avatar.url }}" alt="">
+                                {% endif %}
                             </div>
                             <div class="user_status status_online"></div>
                             <div class="icon_change_photo" hidden="">
