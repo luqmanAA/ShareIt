@@ -32,6 +32,7 @@ class CreateGroupView(LoginRequiredMixin, CreateView):
         form.save(commit=False)
         form.instance.owner_id = self.request.user.id
         form.save()
+        form.instance.admin.add(self.request.user)
         # member = Account.objects.filter(id=self.request.user.id).first()
         # add group creator to members list
         Membership.objects.create(
@@ -59,9 +60,10 @@ class GroupDetailView(LoginRequiredMixin, DetailView):
         context['membership_checked'] = self.object.member.filter(
             user_id=self.request.user.id
         )
-        context['user_suspended'] = self.object.member.filter(
-            user_id=self.request.user.id
-        ).first().is_suspended
+        if self.object.member.filter(user_id=self.request.user.id):
+            context['user_suspended'] = self.object.member.filter(
+                user_id=self.request.user.id
+            ).first().is_suspended
         return context
 
 
