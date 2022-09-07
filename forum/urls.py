@@ -6,7 +6,8 @@ from .views import (
     CreateCommentView, CreatePostView, CreateGroupView, CreateReplyView,
     EditGroupView, FeedView, GroupListView, GroupDetailView,
     JoinLeaveGroupView, MakeAdminView, MemberListVIew, PostListView, PostDetailView,
-    SuspendMemberView, ToggleCommentLikeVIew, TogglePostLikeView, ToggleReplyLikeView
+    RemoveMemberView, SuspendMemberView, ToggleCommentLikeVIew, ToggleCommentVisibilityView,
+    TogglePostLikeView, TogglePostVisibilityView, ToggleReplyLikeView, ToggleReplyVisibilityView
 )
 
 app_name = 'forum'
@@ -27,6 +28,9 @@ urlpatterns = [
     path('group/<slug:slug>/post/<uuid:pk>/like-unlike',
          TogglePostLikeView.as_view(),
          name='like-post'),
+    path('group/<slug:slug>/post/<uuid:pk>/hide-unhide',
+         TogglePostVisibilityView.as_view(),
+         name='hide-post'),
     path('group/<slug:slug>/post/<uuid:pk>/comment',
          CreateCommentView.as_view(),
          name='add-comment'),
@@ -37,12 +41,25 @@ urlpatterns = [
          ToggleCommentLikeVIew.as_view(),
          name='like-comment'
          ),
+    path('group/<slug:slug>/post/<uuid:pk>/comment/<int:int>/hide-unhide',
+         ToggleCommentVisibilityView.as_view(),
+         name='hide-comment'
+         ),
     path('group/<slug:slug>/post/<uuid:pk>/comment/<int:int>/reply/<str:str>/like-dislike',
          ToggleReplyLikeView.as_view(),
          name='like-reply'
          ),
-    path('group/<slug:slug>/members/<int:pk>/suspend', SuspendMemberView.as_view(), name='suspend-member'),
+    path('group/<slug:slug>/post/<uuid:pk>/comment/<int:int>/reply/<str:str>/hide-unhide',
+         ToggleReplyVisibilityView.as_view(),
+         name='hide-reply'
+         ),
+    path('group/<slug:slug>/members/<int:pk>/suspend',
+         SuspendMemberView.as_view(),
+         name='suspend-member'),
+    path('group/<slug:slug>/members/<int:pk>/remove',
+         RemoveMemberView.as_view(),
+         name='remove-member'),
     path('group/<slug:slug>/members/<int:pk>/make-admin', MakeAdminView.as_view(), name='make-admin'),
-    path('group/polls', PollListVIew.as_view(), name='polls'),
+    path('group/<slug:slug>/polls', PollListVIew.as_view(), name='polls'),
 
 ]

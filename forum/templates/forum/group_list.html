@@ -31,7 +31,11 @@
                         <div class="row g-0">
                             <div class="col-md-1">
                                 <a href="#">
-                                    <img src="{{ group.avatar.url }}" class="small-img rounded-circle" alt="...">
+                                    {% if group.avatar %}
+                                        <img src="{{ group.avatar.url }}" class="small-img rounded-circle" alt="...">
+                                    {% else %}
+                                        <img src="" alt="">
+                                    {% endif %}
                                 </a>
 
                             </div>
