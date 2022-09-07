@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from polls.views import PollCreateView, PollDetailView, PollListVIew
 
@@ -76,7 +76,12 @@ urlpatterns += [
          ),
 ]
 
-# poll url patterns
+# events url patterns
+urlpatterns += [
+    path('group/<slug:slug>/events', include('event.urls')),
+]
+
+# polls url patterns
 urlpatterns += [
     path('group/<slug:slug>/polls', PollListVIew.as_view(), name='polls'),
     path('group/<slug:slug>/polls/create', PollCreateView.as_view(), name='create-poll'),
