@@ -3,3 +3,5 @@
 __pycache__/
 *.sqlite3
 forum/migrations
+polls/migrations
+event/migrations
