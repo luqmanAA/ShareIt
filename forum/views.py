@@ -117,10 +117,11 @@ class MakeAdminView(LoginRequiredMixin, View):
         member = Account.objects.filter(id=pk).first()
         group = Group.objects.get(slug=slug)
         if group.admin.filter(username=member.username).exists():
+            group.admin.remove(member)
             messages.add_message(
                 self.request,
                 messages.ERROR,
-                f"{member.username} is already an admin"
+                f"{member.username} is no longer an admin"
             )
         elif group.admin.count() <= 3:
             group.admin.add(member)
