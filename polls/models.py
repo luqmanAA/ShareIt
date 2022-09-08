@@ -40,3 +40,10 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.choice_text
+
+
+class Voter(models.Model):
+    voter = models.ForeignKey(Account, on_delete=models.CASCADE)
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE, null=True)
+
