@@ -16,24 +16,36 @@
         <div class="row justify-content-center">
             <div class="col-lg-6">
 
-                <div class="card">
+
+                <div class="card mb-5">
                     <div class="card-body">
+                        {% if request.GET.command == "verification" %}
+                            <div class="container mx-auto alert alert-danger text-center" role="alert"
+                                 style="max-width: 1024px; margin-top:100px;">
+                                Sorry, you are not allowed to vote more once on a poll.
+
+                                <br><br>
+                                Want to go back? <a href="{{request.META.HTTP_REFERER}}">Click here</a>
+
+                            </div>
+                        {% endif %}
+
                         <h5 class="card-title">Result for Poll: {{ poll.poll_text }}</h5>
 
                         <!-- List group with active and disabled items -->
                         <ul class="list-group">
                             {% for choice in poll.choice_set.all %}
                                 {% if choice.choice_text != '' %}
-                                    <li class="list-group-item">{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
+                                    <li class="list-group-item">{{ choice.choice_text }} -- {{ choice.votes }}
+                                        vote{{ choice.votes|pluralize }}</li>
                                 {% endif %}
                             {% endfor %}
                         </ul>
                         <div class="text-center">
-                            <a href="{% url 'forum:polls' poll.group.slug%}">Vote again?</a>
+                            <a href="{% url 'forum:polls' poll.group.slug %}">All Polls</a>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>

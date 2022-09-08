@@ -6,7 +6,7 @@ from django.views import generic, View
 from forum.models import Group
 
 from .forms import PollForm, ChoiceForm
-from .models import Poll, Choice
+from .models import Poll, Choice, Voter
 
 
 class PollListVIew(generic.ListView):
@@ -17,19 +17,16 @@ class PollListVIew(generic.ListView):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
         return Poll.objects.filter(group=group)
 
-    # # def get(self, request, ):
-    # #     polls = Poll.objects.order_by('-created_date')[:5]
-    # #     print(polls)
-    # #     context = {
-    # #         "polls": polls
-    # #     }
-    #
-    #     return render(request, "polls/polls_list.html", context)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(PollListVIew, self).get_context_data(**kwargs)
+        votes = Voter.objects.filter(voter=self.request.user)
+        context["votes"] = votes
+        return context
 
 
 class PollCreateView(View):
     def get(self, request, slug):
-        context = {'slug':slug}
+        context = {'slug': slug}
         return render(request,
                       "polls/poll_create_view.html",
                       context=context)
@@ -55,30 +52,33 @@ class PollCreateView(View):
             Choice.objects.create(poll=data, choice_text=choice_3)
             Choice.objects.create(poll=data, choice_text=choice_4)
             messages.success(request, "Poll created successfully!")
-            return redirect("polls:poll-list")
+            return redirect("forum:polls", slug)
         else:
             messages.error(request, "There's error in your input(s)")
             context = {
-                "poll_form":PollForm(request.POST),
+                "poll_form": PollForm(request.POST),
                 "choice_form": ChoiceForm(request.POST)
             }
-            return render(request, "polls/poll_create_view.html", context)
+            return redirect(request, "polls/poll_create_view.html", context)
 
 
 class PollDetailView(View):
-    # model = Poll
-    # template_name = 'polls/polls_detail.html'
+    model = Poll
+    template_name = 'polls/polls_detail.html'
+    poll_id = 0
 
     def get(self, request, slug, pk, **kwargs):
         poll = Poll.objects.filter(id=pk).first()
-        context = {'poll': poll}
+        votes = Voter.objects.filter(voter=self.request.user)
+        context = {
+            'poll': poll,
+            'votes': votes,
+        }
         return render(
             request,
             'polls/polls_detail.html',
             context
         )
-
-
 
 
 class ResultsView(generic.DetailView):
@@ -88,6 +88,8 @@ class ResultsView(generic.DetailView):
 
 def vote(request, poll_id):
     poll = get_object_or_404(Poll, pk=poll_id)
+    if Voter.objects.filter(poll_id=poll_id, voter_id=request.user.id).exists():
+        return redirect(f"/polls/{poll.id}/results/?command=verification&sl={poll.group.slug}")
     try:
         selected_choice = poll.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
@@ -96,7 +98,5 @@ def vote(request, poll_id):
     else:
         selected_choice.votes += 1
         selected_choice.save()
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
+        Voter.objects.create(voter=request.user, poll=poll, choice=selected_choice)
         return HttpResponseRedirect(poll.get_absolute_url())
