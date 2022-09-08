@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
     {% load static %}
+    {% load notifications_tags %}
 
     <section class="section dashboard">
         <div class="row">
@@ -78,7 +79,7 @@
                         <nav class="responsive-nav pl-3">
                             <ul>
                                 <li><a href="#" aria-expanded="false">Discussions</a></li>
-                                <li><a href="{% url 'forum:polls' group.slug %}" >Polls</a></li>
+                                <li><a href="{% url 'forum:polls:poll-list' group.slug %}" >Polls</a></li>
                                 <li><a href="{% url 'forum:event:event-list' group.slug %}" aria-expanded="false">Events</a></li>
                             </ul>
                         </nav>
@@ -394,29 +395,6 @@
                                 {% endif %}
                             </div>
 
-                            <div class="widget card p-5">
-                                <div class="row">
-                                    <h4 class="text-lg font-semibold col-6" > Polls </h4>
-                                    <a class="font-regular col-6" href="{% url 'forum:create-poll' group.slug %}">
-                                        Add Poll </a>
-                                </div>
-
-                                <ul class="text-gray-600 space-y-3 mt-3">
-                                    {% for poll in group.polls.all %}
-                                    <li class="flex items-center space-x-2">
-                                        <a href="{% url 'forum:poll' group.slug poll.id %}">{{ poll.poll_text }}</a>
-                                    </li>
-                                    {% empty %}
-                                    <p>No polls yet</p>
-                                    {% endfor %}
-                                </ul>
-                                {% if request.user == group.owner  %}
-                                <a href="{% url 'forum:polls' group.slug %}" class="button gray mt-3 w-full">
-                                    All Polls
-                                </a>
-                                {% endif %}
-                            </div>
-
                             <div class="widget card p-5 border-t">
                                 <div class="flex items-center justify-between mb-4">
                                     <div>
@@ -424,9 +402,9 @@
                                         <p class="text-sm"> {{ group.member.count }} Members</p>
                                     </div>
                                 </div>
-                                {% if group.member.count > 0 %}
-                                {% for member in group.member.all %}
-                                    <div class="grid grid-cols-3 gap-3 text-gray-600 font-semibold">
+                                <div class="grid grid-cols-3 gap-3 text-gray-600 font-semibold">
+                                    {% for member in group.member.all|slice:":6" %}
+
                                         <a href="#">
                                             <div class="avatar relative rounded-md overflow-hidden w-full h-24 mb-2">
                                                 <img src="
@@ -446,12 +424,11 @@
                                                 {% endif %}
                                             </div>
                                         </a>
-                                    </div>
-                                {% endfor %}
+                                    {% endfor %}
+                                </div>
                                 <a href="{% url 'forum:members' group.slug %}" class="button gray mt-3 w-full">
                                     See all
                                 </a>
-                                {% endif %}
                             </div>
 
 

@@ -78,12 +78,10 @@ urlpatterns += [
 
 # events url patterns
 urlpatterns += [
-    path('group/<slug:slug>/events', include('event.urls')),
+    path('group/<slug:slug>/events/', include('event.urls')),
 ]
 
 # polls url patterns
 urlpatterns += [
-    path('group/<slug:slug>/polls', PollListVIew.as_view(), name='polls'),
-    path('group/<slug:slug>/polls/create', PollCreateView.as_view(), name='create-poll'),
-    path('group/<slug:slug>/poll/<int:pk>/detail', PollDetailView.as_view(), name='poll'),
+    path('group/<slug:slug>/polls/', include('polls.urls')),
 ]
