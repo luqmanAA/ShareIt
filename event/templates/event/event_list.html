@@ -1,0 +1,36 @@
+{% extends 'forum/group_template.html' %}
+{% block group-body %}
+    {% load static %}
+{#   <div class="card lg:mx-0 p-4" uk-toggle="target: #create-post-modal">#}
+
+       <div class="grid grid-flow-col pt-3 -mx-1 -mb-1 font-semibold text-sm">
+           <a href="{% url 'forum:event:create-event' group.slug %}">Create Event</a>
+       </div>
+    <br>
+{#   </div>#}
+
+
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <div class="uk-switcher lg:mt-8 mt-4" id="timeline-tab" style="touch-action: pan-y pinch-zoom;">
+        <div class="md:flex md:space-x-6 uk-active">
+            <div class="space-y-5 flex-shrink-0 md:w-7/12">
+                <div class="card lg:mx-0 uk-animation-slide-bottom-small visible-card">
+                <div>
+                <center>
+                    <h1>Upcoming Events</h1>
+                </center>
+                <br>
+                </div>
+                    {% for event in event_list %}
+                       <img src="{% static 'img/event_bg.png' %}" alt="">
+                        <h3>&nbsp;&nbsp;<a href="{% url 'forum:event:event-detail' event.group.slug event.id %}">{{ event.name }}</a></h3>
+                        <p>Start date: &nbsp;{{ event.start_date_time }}</p>
+                        <p>End date:&nbsp;{{ event.start_date_time }}</p>
+                        <p>&nbsp;<b>Hosted by</b> : {{ event.host.username|title }}</p>
+                        <br>
+                    {% empty %}
+                        No Event
+                    {% endfor %}
+                </div>
+            </div>
+{% endblock %}
