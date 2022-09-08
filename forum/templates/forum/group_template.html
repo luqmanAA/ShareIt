@@ -79,8 +79,8 @@
                         <nav class="responsive-nav pl-3">
                             <ul>
                                 <li><a href="{% url 'forum:group-detail' group.slug %}" aria-expanded="false">Discussions</a></li>
-                                <li><a href="{% url 'forum:polls' group.slug %}" >Polls</a></li>
-                                <li><a href="#" aria-expanded="false">Events</a></li>
+                                <li><a href="{% url 'forum:polls:poll-list' group.slug %}" >Polls</a></li>
+                                <li><a href="{% url 'forum:event:event-list' group.slug %}" aria-expanded="false">Events</a></li>
                             </ul>
                         </nav>
 

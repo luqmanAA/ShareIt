@@ -16,14 +16,15 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 
 urlpatterns = [
     path('', include('forum.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls', namespace="accounts")),
     path('polls/', include('polls.urls', namespace='polls')),
-    path('events', include('event.urls', namespace='event'))
+    path('events', include('event.urls', namespace='event')),
+    re_path('^notifications/', include('notifications.urls', namespace='notifications')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

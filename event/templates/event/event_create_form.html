@@ -2,40 +2,53 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <div class="pagetitle">
-        <h1>Event Creation Page</h1>
-        <nav>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url "forum:home" %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url "polls:poll-list" %}">Polls</a></li>
-                <li class="breadcrumb-item"><a href="{% url "event:event-list" %}">Event</a></li>
-                <li class="breadcrumb-item active">Create Event</li>
-            </ol>
-        </nav>
-    </div><!-- End Page Title -->
+{#    <div class="pagetitle">#}
+{#        <h1>Event Creation Page</h1>#}
+{#        <nav>#}
+{#            <ol class="breadcrumb">#}
+{#                <li class="breadcrumb-item"><a href="{% url "forum:home" %}">Home</a></li>#}
+{#                <li class="breadcrumb-item"><a href="{% url "polls:poll-list" %}">Polls</a></li>#}
+{#                <li class="breadcrumb-item"><a href="{% url "event:event-list" %}">Event</a></li>#}
+{#                <li class="breadcrumb-item active">Create Event</li>#}
+{#            </ol>#}
+{#        </nav>#}
+{#    </div><!-- End Page Title -->#}
+{##}
+{#    <section class="section">#}
+{#        <div class="row justify-content-center">#}
+{#            <div class="col-lg-6">#}
+{##}
+{#                <div class="card">#}
+{#                    <div class="card-body">#}
+{#                        <h5 class="card-title">Create an event by filling out the form below:</h5>#}
+{#                        {% include "includes/alerts.html" %}#}
+{##}
+{#                        <!-- General Form Elements -->#}
+{#                        <form method="post" action="">#}
+{#                            {% csrf_token %}#}
+{#                            {{ form|crispy }}#}
+{#                            <br>#}
+{#                            <button type="submit" class="btn btn-primary">Submit Form</button>#}
+{#                        </form><!-- End General Form Elements -->#}
+{##}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{#            </div>#}
+{#        </div>#}
+{#    </section>#}
+    <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+  {{ form.date }}
+  <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+  </div>
+</div>
 
-    <section class="section">
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Create an event by filling out the form below:</h5>
-                        {% include "includes/alerts.html" %}
-
-                        <!-- General Form Elements -->
-                        <form method="post" action="">
-                            {% csrf_token %}
-                            {{ form|crispy }}
-                                    <button type="submit" class="btn btn-primary">Submit Form</button>
-                                </div>
-                            </div>
-                        </form><!-- End General Form Elements -->
-
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
+<script>
+  $(function () {
+    $("#datetimepicker1").datetimepicker({
+      format: 'DD/MM/YYYY HH:mm',
+    });
+  });
+</script>
 {% endblock %}

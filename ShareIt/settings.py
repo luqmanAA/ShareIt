@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'polls',
     'event',
     'crispy_forms',
+    'notifications',
 ]
 
 MIDDLEWARE = [
