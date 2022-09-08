@@ -11,11 +11,26 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 
+from notifications.signals import notify
+
 from accounts.models import Account
 
 from .forms import CreateCommentForm, CreatePostForm, CreateReplyForm
 from .models import Comment, Group, Membership, Post, Reply
 # Create your views here.
+
+
+class GroupMixin:
+
+    def dispatch(self, request, *args, **kwargs):
+        self.group = Group.objects.get(slug=self.kwargs.get('slug'))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['group'] = self.group
+        context['membership_checked'] = self.group.member.filter(user_id=self.request.user.id).exists()
+        return context
 
 
 class FeedView(LoginRequiredMixin, View):
@@ -52,14 +67,11 @@ class GroupListView(LoginRequiredMixin, ListView):
     model = Group
 
 
-class GroupDetailView(LoginRequiredMixin, DetailView):
+class GroupDetailView(GroupMixin, LoginRequiredMixin, DetailView):
     model = Group
 
     def get_context_data(self, **kwargs):
         context = super(GroupDetailView, self).get_context_data()
-        context['membership_checked'] = self.object.member.filter(
-            user_id=self.request.user.id
-        )
         if self.object.member.filter(user_id=self.request.user.id):
             context['user_suspended'] = self.object.member.filter(
                 user_id=self.request.user.id
@@ -90,7 +102,7 @@ class JoinLeaveGroupView(LoginRequiredMixin, View):
         )
 
 
-class MemberListVIew(LoginRequiredMixin, ListView):
+class MemberListVIew(GroupMixin, LoginRequiredMixin, ListView):
     context_object_name = 'membership_list'
     template_name = 'forum/members.html'
     paginate_by = 10
@@ -103,10 +115,10 @@ class MemberListVIew(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['group'] = Group.objects.filter(slug=self.kwargs['slug']).first()
-        context['membership_checked'] = context['group'].member.filter(
-            user_id=self.request.user.id
-        )
+        # context['group'] = Group.objects.filter(slug=self.kwargs['slug']).first()
+        # context['membership_checked'] = context['group'].member.filter(
+        #     user_id=self.request.user.id
+        # )
         context['suspended_members'] = context['group'].member.filter(is_suspended=True)
         return context
 
@@ -261,10 +273,16 @@ class TogglePostLikeView(LoginRequiredMixin, View):
     def get(self, request, slug, pk, **kwargs):
         try:
             post = Post.objects.get(id=pk)
+            sender = request.user
+            recipient = post.author
             if post.likes.filter(id=request.user.id).exists():
                 post.likes.remove(request.user)
+                action = 'unliked your post'
+                notify.send(sender, recipient=recipient, verb=action)
             else:
                 post.likes.add(request.user)
+                action = 'liked your post'
+                notify.send(sender, recipient=recipient, verb=action)
             post.save()
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         except Post.DoesNotExist:
@@ -276,10 +294,16 @@ class ToggleCommentLikeVIew(LoginRequiredMixin, View):
     def get(self, request, int, **kwargs):
         try:
             comment = Comment.objects.get(id=int)
+            sender = request.user
+            recipient = comment.author
             if comment.likes.filter(id=request.user.id).exists():
                 comment.likes.remove(request.user)
+                action = 'unliked your comment'
+                notify.send(sender, recipient=recipient, verb=action)
             else:
                 comment.likes.add(request.user)
+                action = 'liked your comment'
+                notify.send(sender, recipient=recipient, verb=action)
             comment.save()
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         except Comment.DoesNotExist:
@@ -291,10 +315,16 @@ class ToggleReplyLikeView(LoginRequiredMixin, View):
     def get(self, request, str, **kwargs):
         try:
             reply = Reply.objects.get(id=str)
+            sender = request.user
+            recipient = reply.author
             if reply.likes.filter(id=request.user.id).exists():
                 reply.likes.remove(request.user)
+                action = 'unliked your reply'
+                notify.send(sender, recipient=recipient, verb=action)
             else:
                 reply.likes.add(request.user)
+                action = 'liked your reply'
+                notify.send(sender, recipient=recipient, verb=action)
             reply.save()
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         except Reply.DoesNotExist:
@@ -373,7 +403,10 @@ class RemoveMemberView(LoginRequiredMixin, View):
             )
         elif Membership.objects.filter(user_id=pk).exists():
             group.admin.remove(user)
-            Membership.objects.filter(user_id=pk).delete()
+            Membership.objects.filter(
+                user_id=pk,
+                group_id=group.id
+            ).delete()
             # group.member.remove(user)
             group.save()
             messages.error(
