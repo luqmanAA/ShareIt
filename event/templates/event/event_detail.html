@@ -1,16 +1,35 @@
 {% extends 'forum/group_template.html' %}
 {% block group-body %}
-
-{#    <div class="uk-switcher lg:mt-8 mt-4" id="timeline-tab" style="touch-action: pan-y pinch-zoom;">#}
-{#        <div class="md:flex md:space-x-6 uk-active">#}
-{#            <div class="space-y-5 flex-shrink-0 md:w-7/12">#}
-{#                <div class="card lg:mx-0 uk-animation-slide-bottom-small visible-card">#}
+{% load static %}
+    <div class="uk-switcher lg:mt-8 mt-4" id="timeline-tab" style="touch-action: pan-y pinch-zoom;">
+        <div class="md:flex md:space-x-6 uk-active">
+            <div class="space-y-5 flex-shrink-0 md:w-7/12">
+                <div class="card lg:mx-0 uk-animation-slide-bottom-small visible-card">
 {#                   {% include 'event/event_detail.html' %}#}
-{#                    <center>#}
-{#                        <h1>Detail page</h1>#}
-{#                    </center>#}
-{#                    <br>#}
-{##}
-{#                </div>#}
-{#            </div>#}
+
+                        <img src="{% if event.Cover_image %}
+                           {{ event.Cover_image.url}}{% else %}
+                            {% static 'img/event_bg.png' %}{% endif %}"
+                             alt="">
+                        <br>
+                        <center>
+                            <h3>{{ event.name }}</h3>
+                        </center>
+                        <br>
+                        <p>Start date :{{ event.start_date_time|date }}</p>
+                        <p>Start time :{{ event.start_date_time|time }}</p>
+                        <p>End date :{{ event.end_date_time|date }}</p>
+                        <p>End time :{{ event.end_date_time|time }}</p>
+                        <p>Hosted by : {{ event.host }}</p>
+                        <br>
+                        <p>Event description :{{ event.description }}</p>
+                        <center>
+                        <a href="{% url 'forum:event:event-edit' event.group.slug event.pk %}">
+                        <button type="submit" class="btn btn-primary"> Edit </button>
+                        </a>
+                        </center>
+                    <br>
+
+                </div>
+            </div>
 {% endblock %}
