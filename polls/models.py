@@ -9,11 +9,12 @@ from forum.models import Group
 
 
 class Poll(models.Model):
-    poll_text = models.CharField(max_length=200, null=True)
-    created_date = models.DateTimeField(auto_now_add=True, editable=False)
+    poll_text = models.CharField(max_length=150, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
     poll_author = models.ForeignKey(Account, on_delete=models.CASCADE, editable=False)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, related_name='polls')
-
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
     def was_published_recently(self):
         now = timezone.now()
         return now - datetime.timedelta(days=1) <= self.created_date <= now
@@ -31,7 +32,7 @@ class Poll(models.Model):
         return self.poll_text
 
     def get_absolute_url(self):
-        return reverse('polls:results', args=(self.id,))
+        return reverse('forum:polls:results', args=(self.group.slug, self.id,))
 
 class Choice(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
@@ -42,7 +43,7 @@ class Choice(models.Model):
         return self.choice_text
 
 
-class Voter(models.Model):
+class Vote(models.Model):
     voter = models.ForeignKey(Account, on_delete=models.CASCADE)
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE, null=True)
