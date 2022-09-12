@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Choice, Poll, Voter
+from .models import Choice, Poll, Vote
 
 
 class ChoiceInline(admin.TabularInline):
@@ -10,7 +10,7 @@ class ChoiceInline(admin.TabularInline):
 
 class PollAdmin(admin.ModelAdmin):
     inlines = [ChoiceInline]
-    list_display = ('poll_text', 'created_date', 'was_published_recently')
+    list_display = ('poll_text', "start_date", "end_date", 'created_date', 'was_published_recently')
     list_filter = ['created_date']
 
 
@@ -19,4 +19,4 @@ class VoterAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Poll, PollAdmin)
-admin.site.register(Voter, VoterAdmin)
+admin.site.register(Vote, VoterAdmin)

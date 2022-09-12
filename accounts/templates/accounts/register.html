@@ -64,33 +64,39 @@
 
                                 <div class="pt-4 pb-2">
                                     <h5 class="card-title text-center pb-0 fs-4">Create an Account</h5>
-                                    <p class="text-center small">Enter your personal details to create account</p>
+                                    <p class="text-center small">It's quick and easy.</p>
                                     {% include "includes/alerts.html" %}
                                 </div>
 
                                 <form class="row g-3 needs-validation" novalidate method="post"
                                       action="{% url "accounts:register" %}">
                                     {% csrf_token %}
+                                    <div class="col-6">
+                                        {{ form.first_name }}
+                                        <div class="invalid-feedback">Please enter a valid name!</div>
+                                    </div>
+                                    <div class="col-6">
+                                        {{ form.last_name }}
+                                        <div class="invalid-feedback">Please enter a valid name!</div>
+                                    </div>
                                     <div class="col-12">
-                                        <label for="yourEmail" class="form-label">Your Email</label>
-                                        <input type="email" name="email" class="form-control" id="yourEmail"
-                                               required>
-                                        <div class="invalid-feedback">Please enter a valid Email adddress!</div>
+                                        {{ form.email }}
+                                        <div class="invalid-feedback">Please enter a valid Email address!</div>
                                     </div>
 
-                                    <div class="col-12">
-                                        <label for="yourPassword" class="form-label">Password</label>
-                                        <input type="password" name="password" class="form-control"
-                                               id="yourPassword" required>
+                                    <div class="col-6">
+                                        {#                                        <label for="yourPassword" class="form-label">Password</label>#}
+                                        {{ form.password }}
                                         <div class="invalid-feedback">Please enter your password!</div>
                                     </div>
 
-                                    <div class="col-12">
-                                        <label for="confirm" class="form-label">Confirm Password</label>
-                                        <input type="password" name="confirm_password" class="form-control"
-                                               id="confirm" required>
-                                        <div class="invalid-feedback">Please enter your password!</div>
+                                    <div class="col-6">
+                                        {#                                        <label for="confirm" class="form-label">Confirm Password</label>#}
+                                        {{ form.confirm_password }}
+                                        <div class="invalid-feedback">Please enter a correct password!</div>
                                     </div>
+                                    {{ form.email.errors }}
+                                    {{ form.non_field_errors }}
                                     <div class="col-6">
                                         <button class="btn btn-primary w-100" type="submit">Create Account</button>
                                     </div>
