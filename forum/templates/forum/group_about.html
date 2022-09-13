@@ -1,0 +1,32 @@
+{% extends 'forum/group_template.html' %}
+
+{% block group-body %}
+    <div class="uk-switcher lg:mt-8 mt-4" id="timeline-tab" style="touch-action: pan-y pinch-zoom;">
+        <div class="md:flex md:space-x-6 uk-active">
+            <div class="space-y-5 flex-shrink-0 md:w-7/12">
+                <div class="card lg:mx-0 uk-animation-slide-bottom-small visible-card lg:p-4 p-2.5">
+                    <h5 class="text-lg font-semibold">About this group</h5>
+                    <p>{{ group.description }}</p>
+                    <div class="flex justify-content-start">
+                        <span class="mx-3"><i class="fa-solid fa-earth-africa"></i></span>
+                        <p>{{ group.privacy|title }}</p>
+                    </div>
+                </div>
+                <div class="card lg:mx-0 uk-animation-slide-bottom-small visible-card lg:p-4 p-2.5">
+                    <h5 class="text-lg font-semibold">Activity</h5>
+                    <div class="flex justify-content-start">
+                        <span class="mx-3"><i class="fa-solid fa-users"></i></span>
+                        <p>{{ group.member.count }} total members</p>
+                    </div>
+                    <div class="flex justify-content-start">
+                        <span class="mx-3"><i class="fa-solid fa-comment-dots"></i></span>
+                        <p>{{ group.posts.count }} total posts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block group-sidebar-element %}
+
+{% endblock %}
