@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
 {% block content %}
     {% load static %}
     {% load notifications_tags %}
@@ -100,43 +102,41 @@
                                     {% include "includes/alerts.html" %}
 
                                     <!-- General Form Elements -->
-                                    <form method="post" action="{% url "forum:polls:poll-edit" poll.group.slug poll.id %}">
+                                    <form method="post"
+                                          action="{% url "forum:polls:poll-edit" poll.group.slug poll.id %}">
                                         {% csrf_token %}
-                                        <div class="row mb-3">
-                                            <label for="inputText" class="col-sm-2 col-form-label">Poll
-                                                Text</label>
-                                            <div class="col-sm-10">
-                                                {{ poll_form.poll_text }}
+                                        {% for field in poll_form %}
+                                            <div class="row mb-3
+                                                    {% if field.field.required %}{{ poll_form.required_css_class }}"{% endif %}>
+                                                <label for="inputText"
+                                                       class="col-sm-2 col-form-label">{{ field.label }}:</label>
+                                                <div class="col-sm-10">{{ field }}</div>
                                             </div>
-                                        </div>
-                                        {% for choice in choices %}
-                                            {% if choice.choice_text != '' %}
-                                            <div class="row mb-3">
-                                                <label for="inputText" class="col-sm-2 col-form-label">Choice
-                                                    {{ forloop.counter }}</label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" name="choice_{{ forloop.counter }}" value="{{ choice.choice_text }}" class="form-control"
-                                                           required>
-                                                </div>
-                                            </div>
-                                            {% endif %}
                                         {% endfor %}
-                                        <div class="row mb-3">
-                                            <label for="inputText" class="col-sm-2 col-form-label">Start Date</label>
-                                            <div class="col-sm-10">
-                                                {{ poll_form.start_date }}
+                                        {% if formset %}
+                                            <span id="management">{{ formset.management_form }}</span>
+                                            <div id="choice-form-list">
+                                                {% for form in formset %}
+                                                    <div class="choice-form row mb-3">
+                                                        <label for="inputText"
+                                                               class="col-sm-2 col-form-label">Choice {{ forloop.counter }}:</label>
+                                                        {% for field in form %}
+                                                            <div class="col-sm-10">{{ field }}</div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endfor %}
                                             </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <label for="inputText" class="col-sm-2 col-form-label">End Date</label>
-                                            <div class="col-sm-10">
-                                                {{ poll_form.end_date }}
+                                            <div id="empty-form" class="hidden">
+                                                {{ formset.empty_form.as_p }}
                                             </div>
-                                        </div>
+                                            <button id="add-more" type="button" class="btn btn-primary ml-2 mb-3">Add
+                                                Choice
+                                            </button>
+                                        {% endif %}
                                         <div class="row mb-3">
                                             <label class="col-sm-2 col-form-label"></label>
                                             <div class="col-sm-10">
-                                                <button type="submit" class="btn btn-primary">Submit Form
+                                                <button type="submit" class="btn btn-success ml-2">Submit Form
                                                 </button>
                                             </div>
                                         </div>
@@ -145,8 +145,6 @@
                                 </div>
                             </div>
                         </div>
-
-
                         <!-- Sidebar -->
                         <div class="w-full space-y-6">
 
@@ -169,11 +167,11 @@
                                     </li>
                                 </ul>
                                 <div class="gap-3 grid grid-cols-3 mt-4">
-{#                                    <img src="assets/images/avatars/avatar-lg-2.jpg" alt=""#}
-{#                                         class="object-cover rounded-lg col-span-full">#}
-{#                                    <img src="assets/images/avatars/avatar-2.jpg" alt="" class="rounded-lg">#}
-{#                                    <img src="assets/images/avatars/avatar-4.jpg" alt="" class="rounded-lg">#}
-{#                                    <img src="assets/images/avatars/avatar-5.jpg" alt="" class="rounded-lg">#}
+                                    {#                                    <img src="assets/images/avatars/avatar-lg-2.jpg" alt=""#}
+                                    {#                                         class="object-cover rounded-lg col-span-full">#}
+                                    {#                                    <img src="assets/images/avatars/avatar-2.jpg" alt="" class="rounded-lg">#}
+                                    {#                                    <img src="assets/images/avatars/avatar-4.jpg" alt="" class="rounded-lg">#}
+                                    {#                                    <img src="assets/images/avatars/avatar-5.jpg" alt="" class="rounded-lg">#}
                                 </div>
                                 {% if request.user == group.owner %}
                                     <a href="{% url 'forum:group-edit' group.slug %}" class="button gray mt-3 w-full">
@@ -219,16 +217,11 @@
 
 
                         </div>
-
-
                     </div>
-
-
                 </div>
             </div>
         </div>
     </section>
-
 
 
     <script>
@@ -291,6 +284,27 @@
 
             }
         }
+    </script>
+    <script>
+        const addMoreBtn = document.getElementById("add-more")
+        const totalNewForms = document.querySelector("#id_form-TOTAL_FORMS")
+        addMoreBtn.addEventListener('click', (event) => {
+            if (event) {
+                event.preventDefault()
+            }
+            const currentChoiceForms = document.getElementsByClassName('choice-form')
+            let currentFormCount = currentChoiceForms.length
+            const formCopyTarget = document.getElementById('choice-form-list')
+            const copyEmptyFormEl = document.getElementById('empty-form').cloneNode(true)
+            copyEmptyFormEl.setAttribute('class', 'choice-form')
+            copyEmptyFormEl.setAttribute('id', `form-${currentFormCount}`)
+            const regex = new RegExp('__prefix__', 'g')
+            copyEmptyFormEl.innerHTML = copyEmptyFormEl.innerHTML.replace(regex, currentFormCount)
+            console.log(currentFormCount + 1)
+            totalNewForms.setAttribute('value', currentFormCount + 1)
+            // now add new empty form element to our html form
+            formCopyTarget.append(copyEmptyFormEl)
+        })
     </script>
 
 {% endblock %}

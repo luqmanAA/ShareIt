@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 django-notifications-hq = "*"
+django-htmx = "*"
 
 [dev-packages]
 
