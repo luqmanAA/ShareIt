@@ -105,47 +105,41 @@
                                         {% csrf_token %}
                                         <div class="row mb-3">
                                             <label for="poll_text" class="col-sm-2 col-form-label">Poll
-                                                Text</label>
+                                                Text:</label>
                                             <div class="col-sm-10">
                                                 {{ poll_form.poll_text }}
                                             </div>
                                         </div>
+                                        {% if formset %}
+                                            <span id="management">{{ formset.management_form }}</span>
+                                            <div id="choice-form-list">
+                                                {% for form in formset %}
+                                                    <div class="choice-form row mb-3">
+                                                        <label for="inputText"
+                                                               class="col-sm-2 col-form-label">Choice {{ forloop.counter }}:</label>
+                                                        {% for field in form %}
+                                                            <div class="col-sm-10">{{ field }}</div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            <div id="empty-form" class="hidden">
+                                                {{ formset.empty_form.as_p }}
+                                            </div>
+
+                                            <button id="add-more" type="button" class="btn btn-primary ml-2 mb-3">Add
+                                                Choice
+                                            </button>
+                                        {% endif %}
                                         <div class="row mb-3">
-                                            <label for="choice_1" class="col-sm-2 col-form-label">Choice
-                                                1</label>
+                                            <label for="inputDate" class="col-sm-2 col-form-label">Start Date:</label>
                                             <div class="col-sm-10">
-                                                {{ choice_form.choice_1 }}
+                                                <input type="date" class="form-control" id="inputDate"
+                                                       name="start_date">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
-                                            <label for="choice_2" class="col-sm-2 col-form-label">Choice
-                                                2</label>
-                                            <div class="col-sm-10">
-                                                {{ choice_form.choice_2 }}
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <label for="choice_3" class="col-sm-2 col-form-label">Choice
-                                                3</label>
-                                            <div class="col-sm-10">
-                                                {{ choice_form.choice_3 }}
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <label for="choice_4" class="col-sm-2 col-form-label">Choice
-                                                4</label>
-                                            <div class="col-sm-10">
-                                               {{ choice_form.choice_4 }}
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <label for="inputDate" class="col-sm-2 col-form-label">Start Date</label>
-                                            <div class="col-sm-10">
-                                                <input type="date" class="form-control" id="inputDate" name="start_date">
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <label for="inputDate" class="col-sm-2 col-form-label">End Date</label>
+                                            <label for="inputDate" class="col-sm-2 col-form-label">End Date:</label>
                                             <div class="col-sm-10">
                                                 <input type="date" class="form-control" id="inputDate" name="end_date">
                                             </div>
@@ -153,7 +147,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-2 col-form-label"></label>
                                             <div class="col-sm-10">
-                                                <button type="submit" class="btn btn-primary">Submit Form
+                                                <button type="submit" class="btn btn-success">Submit Form
                                                 </button>
                                             </div>
                                         </div>
@@ -308,6 +302,27 @@
 
             }
         }
+    </script>
+    <script>
+        const addMoreBtn = document.getElementById("add-more")
+        const totalNewForms = document.querySelector("#id_form-TOTAL_FORMS")
+        addMoreBtn.addEventListener('click', (event) => {
+            if (event) {
+                event.preventDefault()
+            }
+            const currentChoiceForms = document.getElementsByClassName('choice-form')
+            let currentFormCount = currentChoiceForms.length
+            const formCopyTarget = document.getElementById('choice-form-list')
+            const copyEmptyFormEl = document.getElementById('empty-form').cloneNode(true)
+            copyEmptyFormEl.setAttribute('class', 'choice-form')
+            copyEmptyFormEl.setAttribute('id', `form-${currentFormCount}`)
+            const regex = new RegExp('__prefix__', 'g')
+            copyEmptyFormEl.innerHTML = copyEmptyFormEl.innerHTML.replace(regex, currentFormCount)
+            console.log(currentFormCount + 1)
+            totalNewForms.setAttribute('value', currentFormCount + 1)
+            // now add new empty form element to our html form
+            formCopyTarget.append(copyEmptyFormEl)
+        })
     </script>
 
 {% endblock %}

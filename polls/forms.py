@@ -1,8 +1,10 @@
 from django import forms
+
 from .models import Poll, Choice
 
 
 class PollForm(forms.ModelForm):
+    required_css_class = 'required-field'
 
     class Meta:
         model = Poll
@@ -10,20 +12,23 @@ class PollForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(PollForm, self).__init__(*args, **kwargs)
-        self.fields["start_date"].widget.attrs["placeholder"] = "mm/dd/yyyy"
-        self.fields["end_date"].widget.attrs["placeholder"] = "mm/dd/yyyy"
+        for field in self.fields:
+            new_data = {
+                "class": "form-control"
+            }
+            self.fields[str(field)].widget.attrs.update(new_data)
 
 
-class ChoiceForm(forms.Form):
-    choice_1 = forms.CharField(max_length=50, required=True)
-    choice_2 = forms.CharField(max_length=50, required=True)
-    choice_3 = forms.CharField(max_length=50, required=False)
-    choice_4 = forms.CharField(max_length=50, required=False)
+class ChoicesForm(forms.ModelForm):
+    required_css_class = 'required-field'
+    choice_text = forms.CharField(required=False)
+
+    class Meta:
+        model = Choice
+        fields = ['choice_text']
 
     def __init__(self, *args, **kwargs):
-        super(ChoiceForm, self).__init__(*args, **kwargs)
-        self.fields["choice_3"].widget.attrs["placeholder"] = "Not required"
-        self.fields["choice_4"].widget.attrs["placeholder"] = "Not required"
+        super(ChoicesForm, self).__init__(*args, **kwargs)
 
-
-
+        for field in self.fields:
+            self.fields[str(field)].label = "New Choice"

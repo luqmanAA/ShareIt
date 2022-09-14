@@ -2,13 +2,15 @@ from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
+from django.forms.models import modelformset_factory  # modelform for querysets
+from django.forms import formset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import generic, View
 
 from forum.models import Group, Membership
 
-from .forms import PollForm, ChoiceForm
+from .forms import PollForm, ChoicesForm
 from .models import Poll, Choice, Vote
 from forum.views import GroupMixin
 
@@ -19,7 +21,7 @@ class PollListVIew(GroupMixin, generic.ListView):
 
     def get_queryset(self):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
-        return Poll.objects.filter(group=group)
+        return Poll.objects.filter(group=group).order_by("-created_date")
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PollListVIew, self).get_context_data(**kwargs)
@@ -35,10 +37,11 @@ class PollListVIew(GroupMixin, generic.ListView):
 class PollCreateView(GroupMixin, LoginRequiredMixin, View):
     def get(self, request, slug):
         poll_form = PollForm()
-        choice_form = ChoiceForm()
+        ChoiceFormset = formset_factory(ChoicesForm, extra=3)
+        formset = ChoiceFormset()
         context = {
             'poll_form': poll_form,
-            'choice_form': choice_form,
+            'formset': formset,
             'group': self.group,
             'membership_checked': self.group.member.filter(user_id=self.request.user.id).exists()
         }
@@ -47,38 +50,33 @@ class PollCreateView(GroupMixin, LoginRequiredMixin, View):
                       context=context)
 
     def post(self, request, slug):
-        print(request.POST)
         poll_form = PollForm(request.POST)
-        choice_form = ChoiceForm(request.POST)
-        for field in poll_form:
-            print("Field Error:", field.name, field.errors)
-        if poll_form.is_valid() and choice_form.is_valid():
-            data = Poll()
-            data.poll_text = poll_form.cleaned_data["poll_text"]
-            data.start_date = poll_form.cleaned_data["start_date"]
-            data.end_date = poll_form.cleaned_data["end_date"]
-            data.group = self.group
-            data.poll_author = request.user
-            data.save()
+        ChoiceFormset = formset_factory(ChoicesForm, extra=0)
+        formset = ChoiceFormset(request.POST or None)
 
-            choice_1 = choice_form.cleaned_data.get("choice_1")
-            choice_2 = choice_form.cleaned_data.get("choice_2")
-            choice_3 = choice_form.cleaned_data.get("choice_3")
-            choice_4 = choice_form.cleaned_data.get("choice_4")
-
-            Choice.objects.create(poll=data, choice_text=choice_1)
-            Choice.objects.create(poll=data, choice_text=choice_2)
-            Choice.objects.create(poll=data, choice_text=choice_3)
-            Choice.objects.create(poll=data, choice_text=choice_4)
-            messages.success(request, "Poll created successfully!")
-            return redirect("forum:polls:poll-list", slug=slug)
+        if all([poll_form.is_valid(), formset.is_valid()]):
+            if request.user in self.group.admin.all():
+                parent = poll_form.save(commit=False)
+                parent.poll_author = self.request.user
+                parent.group = self.group
+                parent.save()
+                for form in formset:
+                    child = form.save(commit=False)
+                    child.poll = parent
+                    child.save()
+                messages.success(request, "Your poll has been created successfully.")
+                return redirect("forum:polls:poll-list", slug)
+            else:
+                messages.error(request, "You are not allowed to edit this poll.")
+                return HttpResponseForbidden()
         else:
             messages.error(request, "There's error in your input(s). Verify your date formats")
             poll_form = PollForm(request.POST)
-            choice_form = ChoiceForm(request.POST)
+            ChoiceFormset = formset_factory(ChoicesForm, extra=0)
+            formset = ChoiceFormset(request.POST or None)
             context = {
                 'poll_form': poll_form,
-                'choice_form': choice_form,
+                'formset': formset,
                 'group': self.group,
                 'membership_checked': self.group.member.filter(user_id=self.request.user.id).exists()
             }
@@ -87,14 +85,20 @@ class PollCreateView(GroupMixin, LoginRequiredMixin, View):
                           context=context)
 
 
-class PollEditView(GroupMixin, View):
+class PollEditView(GroupMixin, LoginRequiredMixin, View):
     def get(self, request, slug, pk):
         poll = get_object_or_404(Poll, pk=pk)
         poll_form = PollForm(instance=poll)
-        choices = Choice.objects.filter(poll=poll)
+        ChoiceFormset = modelformset_factory(Choice, form=ChoicesForm, extra=0)
+        choices_qs = poll.choice_set.all()
+        # delete all empty choices
+        for choice in choices_qs:
+            if not choice.choice_text:
+                choice.delete()
+        formset = ChoiceFormset(request.POST or None, queryset=choices_qs)
         context = {
             'poll_form': poll_form,
-            'choices': choices,
+            'formset': formset,
             'poll': poll,
             'group': self.group,
             'membership_checked': self.group.member.filter(user_id=self.request.user.id).exists()
@@ -104,36 +108,35 @@ class PollEditView(GroupMixin, View):
     def post(self, request, slug, pk):
         poll = get_object_or_404(Poll, pk=pk)
         poll_form = PollForm(request.POST, instance=poll)
-        choices = Choice.objects.filter(poll=poll)
-        choice_form = ChoiceForm(request.POST)
+        ChoiceFormset = modelformset_factory(Choice, form=ChoicesForm, extra=0)
+        choices_qs = poll.choice_set.all()
+        formset = ChoiceFormset(request.POST or None, queryset=choices_qs)
 
-        for choice in choices:
-            choice.delete()
-
-        if choice_form.is_valid() and poll_form.is_valid():
-            choice_1 = choice_form.cleaned_data.get('choice_1')
-            choice_2 = choice_form.cleaned_data.get('choice_2')
-            choice_3 = choice_form.cleaned_data.get('choice_3')
-            choice_4 = choice_form.cleaned_data.get('choice_4')
-
-            Choice.objects.create(poll=poll, choice_text=choice_1)
-            Choice.objects.create(poll=poll, choice_text=choice_2)
-            Choice.objects.create(poll=poll, choice_text=choice_3)
-            Choice.objects.create(poll=poll, choice_text=choice_4)
-
-            poll_form.save()
-            messages.success(request, "Your poll has been updated successfully.")
-            return redirect("forum:polls:poll-list", slug)
-
+        if all([poll_form.is_valid(), formset.is_valid()]):
+            if request.user in self.group.admin.all():
+                parent = poll_form.save(commit=False)
+                parent.save()
+                for form in formset:
+                    child = form.save(commit=False)
+                    child.poll = parent
+                    child.save()
+                messages.success(request, "Your poll has been updated successfully.")
+                return redirect("forum:polls:poll-list", slug)
+            else:
+                messages.error(request, "You are not allowed to edit this poll.")
+                return HttpResponseForbidden()
         context = {
-            "poll_form": poll_form,
-            "poll": poll,
+            'poll_form': poll_form,
+            'formset': formset,
+            'poll': poll,
+            'group': self.group,
+            'membership_checked': self.group.member.filter(user_id=self.request.user.id).exists()
         }
-        messages.error(request, "Form not valid")
-        return render(request, "accounts/dashboard.html", context)
+        messages.error(request, "Form not valid. No field should be empty.")
+        return render(request, "polls/poll_edit.html", context)
 
 
-class PollDetailView(View):
+class PollDetailView(LoginRequiredMixin, View):
     model = Poll
     template_name = 'polls/polls_detail.html'
     poll_id = 0

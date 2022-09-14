@@ -138,6 +138,7 @@
                                         </div>
                                     {% endif %}
 
+                                    {#                                    {% if request.user in poll.group.admin.all or request.user in poll.group.member.all and current_date > poll.end_date %}#}
                                     <h5 class="card-title">Result for Poll: {{ poll.poll_text }}</h5>
                                     {% include "includes/alerts.html" %}
                                     {% if current_date > poll.end_date or request.user in poll.group.admin.all %}
@@ -151,16 +152,21 @@
                                                 {% endif %}
                                             {% endfor %}
                                         </ul>
-                                        <div class="text-center">
-                                            <a href="{% url 'forum:polls:poll-list' poll.group.slug %}">All Polls</a>
+                                        <div class="text-center flex-row justify-content-center mt-2">
+                                            <a href="{% url 'forum:polls:poll-list' poll.group.slug %}"
+                                               class="d-inline p-2">All Polls</a>
+                                            <h6 class="d-inline p-2 font-weight-bold">Total
+                                                Polls: {{ poll.vote_set.count }}</h6>
                                         </div>
                                     {% elif current_date < poll.start_date %}
                                         <h6 class="text-center text-danger p-4">
-                                            Sorry. You can only view the results after the poll has ended. Check back after
+                                            Sorry. You can only view the results after the poll has ended. Check
+                                            back after
                                             {{ poll.end_date }}
 
                                             <br><br>
-                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click here</a>
+                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click
+                                            here</a>
                                         </h6>
                                     {% else %}
                                         <h6 class="text-center text-danger p-3">
@@ -168,9 +174,14 @@
                                             on {{ poll.end_date }}.
 
                                             <br><br>
-                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click here</a>
+                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click
+                                            here</a>
                                         </h6>
                                     {% endif %}
+                                    {#                                    {% else %}#}
+                                    {#                                        <h3 class="text-center">You are currently NOT allowed to access this page.</h3>#}
+                                    {#                                        <h5 class="text-center">For more information, contact the admin</h5>#}
+                                    {#                                    {% endif %}#}
                                 </div>
                             </div>
                         </div>
