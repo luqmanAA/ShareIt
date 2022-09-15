@@ -1,40 +1,337 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
 {% block content %}
+    {% load static %}
+    {% load notifications_tags %}
 
-    <div class="pagetitle">
-        <h1>ShareIt</h1>
-        <nav>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url "forum:home" %}">Home</a></li>
-                <li class="breadcrumb-item">Polls</li>
-            </ol>
-        </nav>
-    </div><!-- End Page Title -->
+    <section class="section dashboard">
+        <div class="row">
 
-    <section class="section">
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
+            <div class="col-8 mcontainer">
 
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Result for Poll: {{ poll.poll_text }}</h5>
+                <!-- Profile cover -->
+                <div class="profile user-profile">
 
-                        <!-- List group with active and disabled items -->
-                        <ul class="list-group">
-                            {% for choice in poll.choice_set.all %}
-                                {% if choice.choice_text != '' %}
-                                    <li class="list-group-item">{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                        <div class="text-center">
-                            <a href="{% url 'forum:polls' poll.group.slug%}">Vote again?</a>
+                    <div class="profiles_banner">
+                        <img src="{% if group.cover_image %}
+                            {{ group.cover_image.url }}
+                            {% else %}
+                            {% static 'img/cover_image_placeholder.jpg' %}
+                            {% endif %}" alt="">
+                        <div class="profile_action absolute bottom-0 right-0 space-x-1.5 p-3 text-sm z-50 hidden lg:flex">
+                            {% if request.user == group.owner %}
+                                <a href="{% url 'forum:group-edit' group.slug %}"
+                                   class="flex items-center justify-center h-8 px-3 rounded-md bg-gray-700 bg-opacity-70 text-white space-x-1.5">
+                                    <ion-icon name="create-outline" class="text-xl md hydrated" role="img"
+                                              aria-label="create outline"></ion-icon>
+                                    <span> Edit </span>
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
+                    <div class="profiles_content">
+
+                        <div class="profile_avatar">
+                            <div class="profile_avatar_holder">
+                                {% if group.avatar %}
+                                    <img src="{{ group.avatar.url }}" alt="">
+                                {% else %}
+                                    <img src="" alt="">
+                                {% endif %}
+                            </div>
+                            <div class="user_status status_online"></div>
+                            <div class="icon_change_photo" hidden="">
+                                <ion-icon name="camera" class="text-xl md hydrated" role="img"
+                                          aria-label="camera"></ion-icon>
+                            </div>
+                        </div>
+
+                        <div class="profile_info">
+                            <h1> {{ group.name }} </h1>
+                            <p> {{ group.privacy | title }} Group |
+                                <a href="{% url 'forum:members' group.slug %}">
+                                    {{ group.member.count }} members
+                                </a>
+                            </p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            {% if membership_checked %}
+                                <form method="post" action="{% url 'forum:join-leave' group.slug request.user.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
+                                        <span> Leave </span>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="post" action="{% url 'forum:join-leave' group.slug request.user.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
+                                        <span> Join </span>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <div class="flex justify-between lg:border-t border-gray-100 flex-col-reverse lg:flex-row pt-2">
+                        <nav class="responsive-nav pl-3">
+                            <ul>
+                                <li><a href="{% url 'forum:group-detail' group.slug %}" aria-expanded="false">Discussions</a>
+                                </li>
+                                <li><a href="{% url 'forum:polls:poll-list' group.slug %}">Polls</a></li>
+                                <li><a href="{% url 'forum:event:event-list' group.slug %}"
+                                       aria-expanded="false">Events</a></li>
+                            </ul>
+                        </nav>
+
+                    </div>
+
                 </div>
 
+                <div class="uk-switcher lg:mt-8 mt-4" id="timeline-tab" style="touch-action: pan-y pinch-zoom;">
+                    <!-- Timeline -->
+                    <div class="md:flex md:space-x-6 uk-active">
+                        <div class="space-y-5 flex-shrink-0 md:w-7/12">
+
+                            <div class="card">
+                                <div class="card-body">
+                                    {% if request.GET.command == "verification" %}
+                                        <div class="container mx-auto alert alert-danger text-center" role="alert"
+                                             style="max-width: 1024px; margin-top:100px;">
+                                            Sorry, you are not allowed to vote more once on a poll.
+
+                                            <br><br>
+                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click here</a>
+
+                                        </div>
+                                    {% elif request.GET.command == "eligibility" %}
+                                        <div class="container mx-auto alert alert-danger text-center" role="alert"
+                                             style="max-width: 1024px; margin-top:100px;">
+                                            Sorry, you've been suspended by the admin. Hence, you can't vote on this
+                                            poll.
+
+                                            <br><br>
+                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click here</a>
+
+                                        </div>
+                                    {% elif request.GET.command == "session_ended" %}
+                                        <div class="container mx-auto alert alert-danger text-center" role="alert"
+                                             style="max-width: 1024px; margin-top:100px;">
+                                            Sorry, this poll ended on {{ poll.end_date }}. Hence, your vote is not
+                                            recorded.
+
+                                            <br><br>
+                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click here</a>
+
+                                        </div>
+                                    {% elif request.GET.command == "session_resume" %}
+                                        <div class="container mx-auto alert alert-danger text-center" role="alert"
+                                             style="max-width: 1024px; margin-top:100px;">
+                                            Sorry, this poll is starting on {{ poll.start_date }}. Hence, your vote is
+                                            not recorded.
+
+                                            <br><br>
+                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click here</a>
+
+                                        </div>
+                                    {% endif %}
+
+                                    {#                                    {% if request.user in poll.group.admin.all or request.user in poll.group.member.all and current_date > poll.end_date %}#}
+                                    <h5 class="card-title">Result for Poll: {{ poll.poll_text }}</h5>
+                                    {% include "includes/alerts.html" %}
+                                    {% if current_date > poll.end_date or request.user in poll.group.admin.all %}
+                                        <!-- List group with active and disabled items -->
+                                        <ul class="list-group">
+                                            {% for choice in poll.choice_set.all %}
+                                                {% if choice.choice_text != '' %}
+                                                    <li class="list-group-item">{{ choice.choice_text }}
+                                                        -- {{ choice.votes }}
+                                                        vote{{ choice.votes|pluralize }}</li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                        <div class="text-center flex-row justify-content-center mt-2">
+                                            <a href="{% url 'forum:polls:poll-list' poll.group.slug %}"
+                                               class="d-inline p-2">All Polls</a>
+                                            <h6 class="d-inline p-2 font-weight-bold">Total
+                                                Polls: {{ poll.vote_set.count }}</h6>
+                                        </div>
+                                    {% elif current_date < poll.start_date %}
+                                        <h6 class="text-center text-danger p-4">
+                                            Sorry. You can only view the results after the poll has ended. Check
+                                            back after
+                                            {{ poll.end_date }}
+
+                                            <br><br>
+                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click
+                                            here</a>
+                                        </h6>
+                                    {% else %}
+                                        <h6 class="text-center text-danger p-3">
+                                            Voting is still ongoing. Check back for result after 11:59pm
+                                            on {{ poll.end_date }}.
+
+                                            <br><br>
+                                            Want to go back? <a href="{{ request.META.HTTP_REFERER }}">Click
+                                            here</a>
+                                        </h6>
+                                    {% endif %}
+                                    {#                                    {% else %}#}
+                                    {#                                        <h3 class="text-center">You are currently NOT allowed to access this page.</h3>#}
+                                    {#                                        <h5 class="text-center">For more information, contact the admin</h5>#}
+                                    {#                                    {% endif %}#}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Sidebar -->
+                        <div class="w-full space-y-6">
+
+                            <div class="widget card p-5">
+                                <h4 class="text-lg font-semibold"> About </h4>
+                                <ul class="text-gray-600 space-y-3 mt-3">
+                                    <li class="flex items-center space-x-2">
+                                        <ion-icon name="person"
+                                                  class="rounded-full bg-gray-200 text-xl p-1 mr-3 md hydrated"
+                                                  role="img" aria-label="home sharp"></ion-icon>
+                                        Owner: <strong>
+                                        {{ group.owner.username }}
+                                    </strong>
+                                    </li>
+                                    <li class="flex items-center space-x-2">
+                                        <ion-icon name="people"
+                                                  class="rounded-full bg-gray-200 text-xl p-1 mr-3 md hydrated"
+                                                  role="img" aria-label="logo rss"></ion-icon>
+                                        Members: <strong> {{ group.member.count }} </strong>
+                                    </li>
+                                </ul>
+                                <div class="gap-3 grid grid-cols-3 mt-4">
+                                    <img src="assets/images/avatars/avatar-lg-2.jpg" alt=""
+                                         class="object-cover rounded-lg col-span-full">
+                                    <img src="assets/images/avatars/avatar-2.jpg" alt="" class="rounded-lg">
+                                    <img src="assets/images/avatars/avatar-4.jpg" alt="" class="rounded-lg">
+                                    <img src="assets/images/avatars/avatar-5.jpg" alt="" class="rounded-lg">
+                                </div>
+                                {% if request.user == group.owner %}
+                                    <a href="{% url 'forum:group-edit' group.slug %}" class="button gray mt-3 w-full">
+                                        Edit </a>
+                                {% endif %}
+                            </div>
+
+                            <div class="widget card p-5 border-t">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h4 class="text-lg font-semibold"> Members </h4>
+                                        <p class="text-sm"> {{ group.member.count }} Members</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-3 text-gray-600 font-semibold">
+                                    {% for member in group.member.all|slice:":6" %}
+
+                                        <a href="#">
+                                            <div class="avatar relative rounded-md overflow-hidden w-full h-24 mb-2">
+                                                <img src="
+                                                        {% if member.avatar %}
+                                                        {% static member.avatar.url %}
+                                                        {% else %}
+                                                        {% static 'img/avatar-2.jpg' %}
+                                                        {% endif %}"
+                                                     alt=""
+                                                     class="w-full h-full object-cover absolute">
+                                            </div>
+                                            <div class="text-sm truncate">
+                                                {% if member.first_name %}
+                                                    {{ member.first_name }} {{ member.last_name }}
+                                                {% else %}
+                                                    {{ member.username }}
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                                <a href="{% url 'forum:members' group.slug %}" class="button gray mt-3 w-full">
+                                    See all
+                                </a>
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
             </div>
         </div>
     </section>
+
+
+
+    <script>
+        const replyBtns = document.querySelectorAll('.reply-comment')
+        for (let i = 0; i < replyBtns.length; i++) {
+            const replyBtn = replyBtns[i];
+
+            replyBtn.onclick = function (e) {
+                e.preventDefault();
+                console.log('event', e);
+                const commentId = e.target.dataset['comment']
+                const postId = e.target.dataset['parent'];
+                {#const commentSlug = e.target.dataset['commentslug'];#}
+                console.log(commentId, postId)
+
+                commentClass = '.comment-' + commentId
+                let url = "{% url 'forum:group-detail' group.slug %}";
+                url += '/post/' + postId + '/comment/' + commentId + '/reply'
+                console.log(url)
+                let commentboxParent = document.querySelector('.comment-group')
+                let commentToReply = document.querySelector(commentClass);
+                let form = document.createElement('form');
+                form.setAttribute('method', 'post');
+                form.setAttribute('action', url)
+                let csrf = document.createElement('input')
+                csrf.setAttribute('type', 'hidden')
+                csrf.setAttribute('name', 'csrfmiddlewaretoken')
+                csrf.setAttribute('value', '{{ csrf_token }}')
+                form.appendChild(csrf)
+                let div = document.createElement('div')
+                let textarea = document.createElement('textarea')
+                textarea.classList.add("bg-gray-100", "relative", 'dark:bg-gray-800', "border-t")
+                textarea.setAttribute('name', 'content')
+                textarea.setAttribute('id', 'id_content')
+                textarea.setAttribute('placeholder', 'Add your reply')
+                let submit = document.createElement('input')
+                submit.setAttribute('type', 'submit')
+                submit.setAttribute('value', 'Submit')
+                div.appendChild(textarea)
+                div.appendChild(submit)
+                form.appendChild(div)
+
+                let parentDiv = document.createElement('div')
+                {#parentDiv.classList.add('flex')#}
+                parentDiv.appendChild(form)
+
+                commentToReply.appendChild(parentDiv)
+
+                console.log(form)
+
+                {#<form method="post" action="/group/ats-backend/post/e017cc70-e123-464c-b6cc-ca8f0ee87d1f/comment">#}
+                {#    <input type="hidden" name="csrfmiddlewaretoken" value="TCb29OEWtvNpuANWW4HKE6y0ANTrdTfntamGz4Cxfs81kxqF5kAP6fpZd26mxVTA">#}
+                {#    <div class="bg-gray-100 rounded-full relative dark:bg-gray-800 border-t">#}
+                {##}
+                {##}
+                {#        <textarea name="content" cols="40" rows="2" required="" id="id_content" placeholder="Add you comment" class="bg-gray-100 max-h-10 shadow-none px-5"></textarea>#}
+                {#    </div>#}
+                {#    <input type="submit" value="submit">#}
+                {#</form>#}
+
+            }
+        }
+    </script>
+
 {% endblock %}
+
