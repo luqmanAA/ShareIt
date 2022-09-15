@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import (
 from django.contrib.auth.models import Permission
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, ListView
@@ -24,19 +24,38 @@ class GroupMixin:
 
     def dispatch(self, request, *args, **kwargs):
         self.group = Group.objects.get(slug=self.kwargs.get('slug'))
+        self.membership_checked = self.group.member.filter(
+            user_id=self.request.user.id,
+            is_approved=True
+        ).exists()
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['group'] = self.group
-        context['membership_checked'] = self.group.member.filter(user_id=self.request.user.id).exists()
+        context['membership_checked'] = self.group.member.filter(
+            user_id=self.request.user.id,
+            is_approved=True
+        ).exists()
+        context['membership_pending'] = self.group.member.filter(
+            user_id=self.request.user.id,
+            is_approved=False
+        ).exists()
+        context['number_of_members'] = self.group.member.filter(
+            is_approved=True
+        ).count()
         return context
 
 
-class FeedView(LoginRequiredMixin, View):
+class FeedView(LoginRequiredMixin, ListView):
+    model = Group
+    template_name = 'forum/index.html'
+    context_object_name = 'group_feed'
 
-    def get(self, request):
-        return render(request, 'forum/index.html')
+    def get_queryset(self):
+        return Group.objects.filter(
+            member__user_id=self.request.user.id
+        )
 
 
 class CreateGroupView(LoginRequiredMixin, CreateView):
@@ -52,7 +71,8 @@ class CreateGroupView(LoginRequiredMixin, CreateView):
         # add group creator to members list
         Membership.objects.create(
             group_id=form.instance.id,
-            user_id=self.request.user.id
+            user_id=self.request.user.id,
+            is_approved=True
         )
         return super().form_valid(form)
 
@@ -65,10 +85,30 @@ class EditGroupView(LoginRequiredMixin, UpdateView):
 
 class GroupListView(LoginRequiredMixin, ListView):
     model = Group
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+
+        context = super(GroupListView, self).get_context_data()
+        if self.request.GET.get('query'):
+            search_query = self.request.GET.get('query')
+            context['group_list'] = Group.objects.filter(
+                Q(name__icontains=search_query) |
+                Q(description__icontains=search_query)
+            )
+        return context
 
 
 class GroupDetailView(GroupMixin, LoginRequiredMixin, DetailView):
     model = Group
+
+    def get(self, request, **kwargs):
+        group = self.get_object()
+        if group.privacy == "private" and not self.membership_checked:
+            return HttpResponseRedirect(
+                reverse('forum:group-about', args=[group.slug])
+            )
+        return super().get(request, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(GroupDetailView, self).get_context_data()
@@ -79,10 +119,16 @@ class GroupDetailView(GroupMixin, LoginRequiredMixin, DetailView):
         return context
 
 
+class GroupAboutView(GroupMixin, LoginRequiredMixin, DetailView):
+    model = Group
+    template_name_suffix = "_about"
+
+
 class JoinLeaveGroupView(LoginRequiredMixin, View):
 
     def post(self, request, slug, pk, **kwargs):
         group = Group.objects.filter(slug=slug).first()
+        sender = self.request.user
         if group.member.filter(user_id=pk).exists():
             group.admin.remove(request.user)
             Membership.objects.filter(user_id=pk).delete()
@@ -90,8 +136,31 @@ class JoinLeaveGroupView(LoginRequiredMixin, View):
                 request,
                 f"You're no longer a member {group.name}"
             )
+        elif group.privacy == "private":
+            Membership.objects.create(
+                user_id=pk,
+                group_id=group.id,
+                is_approved=False
+            )
+            recipient = group.admin.all()
+            action = f"requested to join {group.name}"
+            description = "join request"
+            notify.send(
+                sender,
+                recipient=recipient,
+                verb=action,
+                action_object=group,
+                description=description
+            )
         else:
-            Membership.objects.create(user_id=pk, group_id=group.id)
+            recipient = get_object_or_404(Account, id=pk)
+            Membership.objects.create(
+                user_id=pk,
+                group_id=group.id,
+                is_approved=True
+            )
+            action = f"joined {group.name}"
+            notify.send(sender, recipient=recipient, verb=action)
             messages.info(
                 request,
                 f"Welcome to {group.name}"
@@ -110,7 +179,10 @@ class MemberListVIew(GroupMixin, LoginRequiredMixin, ListView):
     def get_queryset(self):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
         # account = Account.objects.filter()
-        return group.member.filter(is_suspended=False)
+        return group.member.filter(
+            is_suspended=False,
+            is_approved=True
+        )
         # return group.member.filter()
 
     def get_context_data(self, **kwargs):
@@ -170,15 +242,20 @@ class SuspendMemberView(LoginRequiredMixin, View):
                     group=group,
                     user_id=pk
                 ).first()
-                print(member.is_suspended)
+                sender = self.request.user
+                recipient = get_object_or_404(Account, id=pk)
                 member.is_suspended = not member.is_suspended
                 member.save()
                 if member.is_suspended:
+                    action = f"have been suspended from {group.name}"
+                    notify.send(sender, recipient=recipient, verb=action)
                     messages.error(
                         request,
                         f"{member.user.username} has been suspended"
                     )
                 else:
+                    action = f"suspension in {group.name} has been lifted"
+                    notify.send(sender, recipient=recipient, verb=action)
                     messages.error(
                         request,
                         f"{member.user.username} has been unsuspended"
@@ -198,13 +275,50 @@ class SuspendMemberView(LoginRequiredMixin, View):
             )
 
 
+class ApproveJoinRequestView(LoginRequiredMixin, View):
 
-class AcceptJoinRequestView(LoginRequiredMixin, View):
-    pass
+    def post(self, request, slug, pk, **kwargs):
+        group = get_object_or_404(Group, slug=slug)
+        memebership = get_object_or_404(
+            Membership,
+            user_id=pk,
+            group_id=group.id,
+            is_approved=False
+        )
+        memebership.is_approved = True
+        memebership.save()
+        sender = request.user
+        recipient = memebership.user
+        action = f"Your request to join {group.name} has been approved"
+        notify.send(sender, recipient=recipient, verb=action)
+        next_url = request.POST.get('next_url','')
+        return HttpResponseRedirect(
+            next_url
+        )
 
 
 class RejectJoinRequestView(LoginRequiredMixin, View):
-    pass
+
+    def post(self, request, slug, pk, **kwargs):
+        group = get_object_or_404(Group, slug=slug)
+        member = get_object_or_404(
+            Membership,
+            user_id=pk,
+            group_id=group.id,
+            is_approved=False
+        )
+        member.delete()
+        sender = request.user
+        recipient = get_object_or_404(Account, id=pk)
+        if sender == recipient:
+            action = ""
+        else:
+            action = f"Your request to join {group.name} has been rejected"
+        notify.send(sender, recipient=recipient, verb=action)
+        next_url = request.POST.get('next_url', '')
+        return HttpResponseRedirect(
+            next_url
+        )
 
 
 class CreatePostView(LoginRequiredMixin, FormView):
@@ -243,6 +357,11 @@ class CreateCommentView(LoginRequiredMixin, FormView):
         form.instance.author = self.request.user
         form.instance.post = post
         form.save()
+        sender = self.request.user
+        recipient = form.instance.author
+        action = f'commented on your post ' \
+                 f'{form.instance.post.content[0:10]}...'
+        notify.send(sender, recipient=recipient, verb=action)
         return super().form_valid(form)
 
     def get_success_url(self) -> str:
@@ -260,6 +379,11 @@ class CreateReplyView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         form.instance.comment_id = comment.id
         form.save()
+        sender = self.request.user
+        recipient = form.instance.author
+        action = f"replied on your comment " \
+                 f"'{form.instance.comment.content[0:10]}...'"
+        notify.send(sender, recipient=recipient, verb=action)
         return super().form_valid(form)
 
     def get_success_url(self) -> str:

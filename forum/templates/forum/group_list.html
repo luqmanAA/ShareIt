@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
     {% load static %}
+    {% load forum_tags %}
     <div class="row justify-content-between vertical-center pagetitle">
         <div class="col-4">
             <h1>Groups</h1>
@@ -41,13 +42,21 @@
                             </div>
                             <div class="col-md-10">
                                 <div class="card-body">
-                                    <h5 class="card-title">
+                                    <h5 class="card-title no-mb-pb">
                                         <a href="{% url 'forum:group-detail' group.slug %}">
                                             {{ group.name }}
                                         </a>
                                     </h5>
+                                    <p class="small-txt">{{ group.privacy |title }} group . {{ group.member.count }} members</p>
                                     <p class="card-text">{{ group.description }}</p>
                                 </div>
+                            </div>
+                            <div class="col-md-1">
+                                {% if group.member.all|filter_query:request.user.id %}
+                                    <a href="#"><i class="fa-solid fa-users"></i></a>
+                                {% else %}
+                                    <a href="#"><i class="fa-solid fa-user-plus"></i></a>
+                                {% endif %}
                             </div>
                         </div>
                     </div><!-- End Card with an image on left -->
