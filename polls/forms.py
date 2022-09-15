@@ -1,16 +1,34 @@
 from django import forms
+
 from .models import Poll, Choice
 
 
-class PollForm(forms.Form):
-    poll_text = forms.CharField(max_length=200, required=True)
+class PollForm(forms.ModelForm):
+    required_css_class = 'required-field'
+
+    class Meta:
+        model = Poll
+        fields = ["poll_text", "start_date", "end_date"]
+
+    def __init__(self, *args, **kwargs):
+        super(PollForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            new_data = {
+                "class": "form-control"
+            }
+            self.fields[str(field)].widget.attrs.update(new_data)
 
 
+class ChoicesForm(forms.ModelForm):
+    required_css_class = 'required-field'
+    choice_text = forms.CharField(required=False)
 
-class ChoiceForm(forms.Form):
-    choice_1 = forms.CharField(max_length=50, required=True)
-    choice_2 = forms.CharField(max_length=50, required=True)
-    choice_3 = forms.CharField(max_length=50, required=False)
-    choice_4 = forms.CharField(max_length=50, required=False)
+    class Meta:
+        model = Choice
+        fields = ['choice_text']
 
+    def __init__(self, *args, **kwargs):
+        super(ChoicesForm, self).__init__(*args, **kwargs)
 
+        for field in self.fields:
+            self.fields[str(field)].label = "New Choice"
