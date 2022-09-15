@@ -47,10 +47,13 @@
 
                         <div class="profile_info">
                             <h1> {{ group.name }} </h1>
-                            <p> {{ group.privacy | title }} Group |
+                            <p class="text-center"> {{ group.privacy | title }} Group
+                                {% if group.privacy == 'public' or membership_checked %}
+                                |
                                 <a href="{% url 'forum:members' group.slug %}">
-                                    {{ group.member.count }} members
+                                    {{ number_of_members }} members
                                 </a>
+                                {% endif %}
                             </p>
                         </div>
                         <div class="flex items-center space-x-4">
@@ -60,6 +63,14 @@
                                 <button type="submit"
                                    class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
                                     <span> Leave </span>
+                                </button>
+                                </form>
+                            {% elif membership_pending %}
+                                <form method="post" action="{% url 'forum:reject_join_request' group.slug request.user.id %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                   class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
+                                    <span> Cancel Request </span>
                                 </button>
                                 </form>
                             {% else %}
@@ -78,9 +89,32 @@
                     <div class="flex justify-between lg:border-t border-gray-100 flex-col-reverse lg:flex-row pt-2">
                         <nav class="responsive-nav pl-3">
                             <ul>
-                                <li><a href="{% url 'forum:group-detail' group.slug %}" aria-expanded="false">Discussions</a></li>
-                                <li><a href="{% url 'forum:polls:poll-list' group.slug %}" >Polls</a></li>
-                                <li><a href="{% url 'forum:event:event-list' group.slug %}" aria-expanded="false">Events</a></li>
+                                {% url 'forum:group-about' group.slug as url %}
+                                <li>
+                                    <a class="{% if request.path == url %}active{% endif %}" href="{{ url }}" aria-expanded="false">
+                                        About
+                                    </a>
+                                </li>
+                            {% if group.privacy == 'public' or membership_checked %}
+                                {% url 'forum:group-detail' group.slug as url %}
+                                <li>
+                                    <a class="{% if request.path == url %}active{% endif %}" href="{{url}}" aria-expanded="false">
+                                        Discussions
+                                    </a>
+                                </li>
+                                {% url 'forum:polls:poll-list' group.slug as url %}
+                                <li>
+                                    <a class="{% if request.path == url %}active{% endif %}" href="{{ url }}" >
+                                        Polls
+                                    </a>
+                                </li>
+                                {% url 'forum:event:event-list' group.slug as url %}
+                                <li>
+                                    <a class="{% if request.path == url %}active{% endif %}" href="{{ url }}" aria-expanded="false">
+                                        Events
+                                    </a>
+                                </li>
+                            {% endif %}
                             </ul>
                         </nav>
 
@@ -97,6 +131,7 @@
 
 
                 <!-- Sidebar -->
+                {% block group-sidebar-element %}
                 <div class="w-full space-y-6">
 
                     <div class="widget card p-5">
@@ -106,15 +141,13 @@
                                 <ion-icon name="person"
                                           class="rounded-full bg-gray-200 text-xl p-1 mr-3 md hydrated"
                                           role="img" aria-label="home sharp"></ion-icon>
-                                Admin: <strong>
-                                {{ group.admin.count }}
-                            </strong>
+                                Admin: <strong>{{ group.admin.count }}</strong>
                             </li>
                             <li class="flex items-center space-x-2">
                                 <ion-icon name="people"
                                           class="rounded-full bg-gray-200 text-xl p-1 mr-3 md hydrated"
                                           role="img" aria-label="logo rss"></ion-icon>
-                                Members: <strong> {{ group.member.count }} </strong>
+                                Members: <strong> {{ number_of_members }} </strong>
                             </li>
                         </ul>
                         <div class="gap-3 grid grid-cols-3 mt-4">
@@ -128,11 +161,10 @@
                         <a href="{% url 'forum:group-edit' group.slug %}" class="button gray mt-3 w-full"> Edit </a>
                         {% endif %}
                     </div>
-                    {% block group-sidebar-element %}
-                    {% endblock %}
+
                 </div>
 
-
+                {% endblock %}
             </div>
 
 
