@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'event',
     'crispy_forms',
     'notifications',
+    'widget_tweaks',
 ]
 
 
