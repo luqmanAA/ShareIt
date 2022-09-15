@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    {% load forum_tags %}
     <div class="pagetitle">
         <h1>News Feed</h1>
         <nav>
@@ -12,6 +13,15 @@
     </div><!-- End Page Title -->
     <section class="section dashboard">
         <div class="row">
+            {% for group in group_feed %}
+                {% for post in group.posts.all|slice:":1" %}
+                    <h3>{{ group.name }}</h3>
+                    <p>{{ post.content | truncatewords:10 }}</p>
+                    {% if post.attachement %}
+                    <img src="{{ post.attachment.url }}">
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
         </div>
     </section>
 {% endblock %}
