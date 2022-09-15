@@ -14,7 +14,7 @@ from forum.views import GroupMixin
 from accounts.models import Account
 
 
-class CreateEventView(GroupMixin,LoginRequiredMixin, CreateView):
+class CreateEventView(GroupMixin, LoginRequiredMixin, CreateView):
     model = Event
     template_name = 'event/event_create_form.html'
     fields = ('name', 'location', 'Cover_image', 'description', 'start_date_time', 'end_date_time')
@@ -37,7 +37,7 @@ class CreateEventView(GroupMixin,LoginRequiredMixin, CreateView):
         return reverse('forum:event:event-list', args=[self.kwargs['slug']])
 
 
-class UpcomingExpiredEventView(GroupMixin,View):
+class UpcomingExpiredEventView(LoginRequiredMixin, GroupMixin,View):
     def get(self, request, *args, **kwargs):
         pass
 
@@ -53,14 +53,8 @@ class EditEventView(GroupMixin, LoginRequiredMixin, UpdateView):
     template_name = 'event/event_edit.html'
     success_url = '/'
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial['start_date_time'] = 'Start date and time'
-        initial['end_date_time'] = 'End date and time'
-        return initial
 
-
-class EventListView(GroupMixin,ListView):
+class EventListView(GroupMixin, LoginRequiredMixin, ListView):
     model = Event
     template_name = 'event/event_list.html'
     records = {}
@@ -71,7 +65,6 @@ class EventListView(GroupMixin,ListView):
         return Event.objects.filter(
             group=group
         )
-        # return Event.objects.all().order_by('start_date_time')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -91,7 +84,7 @@ class EventListView(GroupMixin,ListView):
         return context
 
 
-class EventDetailView(GroupMixin,DetailView):
+class EventDetailView(GroupMixin, LoginRequiredMixin, DetailView):
     model = Event
     template_name = 'event/event_detail.html'
 
@@ -104,7 +97,7 @@ class EventDetailView(GroupMixin,DetailView):
     #     return render(request, 'event/event_detail.html', context)
 
 
-class AcceptRejectInviteeView(GroupMixin,View):
+class AcceptRejectInviteeView(GroupMixin, LoginRequiredMixin, View):
 
     def get(self, request, user_id, event_id, **kwargs):
         event_id = Event.objects.get(id=event_id)
