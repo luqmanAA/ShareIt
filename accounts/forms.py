@@ -47,7 +47,6 @@ class UserProfileForm(forms.ModelForm):
     avatar = forms.ImageField(required=False, error_messages={"invalid": ("Image files only",)},
                               widget=forms.FileInput)
 
-
     class Meta:
         model = UserProfile
         fields = ("middle_name", "highest_qualification", "current_city", "state", "country",

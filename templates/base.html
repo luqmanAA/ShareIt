@@ -17,6 +17,8 @@
     <link href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
           rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
 
     <!-- Vendor CSS Files -->
     <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
@@ -26,6 +28,7 @@
     <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/font-awesome/css/all.min.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/quill/quill.snow.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/quill/quill.bubble.css' %}" rel="stylesheet">
     <link href="{% static 'vendor/remixicon/remixicon.css' %}" rel="stylesheet">
@@ -57,12 +60,14 @@
         <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
 
-    <div class="search-bar">
-        <form class="search-form d-flex align-items-center" method="POST" action="#">
-            <input type="text" name="query" placeholder="Search" title="Enter search keyword">
-            <button type="submit" title="Search"><i class="bi bi-search"></i></button>
-        </form>
-    </div><!-- End Search Bar -->
+    {% if group_list %}
+        <div class="search-bar">
+            <form class="search-form d-flex align-items-center" method="GET">
+                <input type="text" name="query" value="{{ request.GET.query }}" placeholder="Search" title="Enter search keyword">
+                <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+            </form>
+        </div><!-- End Search Bar -->
+    {% endif %}
 
     <nav class="header-nav ms-auto">
         <ul class="d-flex align-items-center">
@@ -83,18 +88,44 @@
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
                     <li class="dropdown-header">
                         You have {% live_notify_badge %} new notifications
-                        <a href="#"><span class="badge rounded-pill bg-primary p-2 ms-2">View all</span></a>
+                        <a href="{% url 'notifications:mark_all_as_read' %}?next={{request.path}}">
+                            <span class="badge rounded-pill bg-primary p-2 ms-2">
+                                Mark all as read
+                            </span>
+                        </a>
                     </li>
-                    {% for notification in request.user.notifications.unread %}
+                    {% for notification in request.user.notifications.unread|slice:':4' %}
                     <li>
                         <hr class="dropdown-divider">
                     </li>
 
                     <li class="notification-item">
-                        <i class="bi bi-exclamation-circle text-warning"></i>
+                        <i class="uil-bell mr-1"></i>
                         <div>
-                            <p>{{ notification.actor.username }} {{ notification.verb }}</p>
-                            <p>{{ notification.timestamp | timesince }} ago</p>
+                            <p>
+                                {{ notification}}
+                            {% if notification.description %}
+                                <div class="flex justify-content-around">
+                                    <form method="post" action="{% url 'forum:approve_join_request' notification.action_object.slug notification.actor_object_id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden"
+                                               name="next_url"
+                                               value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
+                                        <button type="submit" class="h-9 px-3 rounded-md bg-blue-600 text-white small-txt">
+                                            Approve
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'forum:reject_join_request' notification.action_object.slug notification.actor_object_id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden"
+                                               name="next_url"
+                                               value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
+                                        <button type="submit" class="h-9 px-3 rounded-md bg-gray-500 text-white small-txt">
+                                            Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
                         </div>
                     </li>
                     {% endfor %}
@@ -146,16 +177,17 @@
 <aside id="sidebar" class="sidebar">
 
     <ul class="sidebar-nav" id="sidebar-nav">
-
+        {% url 'forum:home' as url %}
         <li class="nav-item">
-            <a class="nav-link " href="/">
+            <a class="nav-link {% if request.path == url %}active{% endif %}" href="{{ url }}">
                 <i class="bi bi-grid"></i>
                 <span>News Feed</span>
             </a>
         </li><!-- End Dashboard Nav -->
 
+        {% url 'forum:groups' as url %}
         <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'forum:groups' %}">
+            <a class="nav-link {% if request.path == url %}active{% endif %}" href="{{ url }}">
                 <i class="bi bi-person"></i>
                 <span>Groups</span>
             </a>
@@ -178,6 +210,23 @@
 
     {% block content %}
 
+    {% endblock %}
+    {% block pagination %}
+        {% if is_paginated %}
+            <div class="pagination">
+                <span class="page-links">
+                    {% if page_obj.has_previous %}
+                        <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+                    <span class="page-current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+                    {% if page_obj.has_next %}
+                        <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                    {% endif %}
+                </span>
+            </div>
+        {% endif %}
     {% endblock %}
 
 </main><!-- End #main -->

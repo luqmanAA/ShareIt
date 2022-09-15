@@ -27,6 +27,7 @@ SECRET_KEY = 'django-insecure-!vng8k6#iz$-&_22a2s8!k+-zu8p+db3keiu-rsa0k3x*hg7y$
 DEBUG = True
 
 ALLOWED_HOSTS = []
+DATE_INPUT_FORMATS = ['%d-%m-%Y']
 
 
 # Application definition
