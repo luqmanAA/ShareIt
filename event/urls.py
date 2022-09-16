@@ -9,4 +9,5 @@ urlpatterns = [
     path('<int:pk>/edit/', views.EditEventView.as_view(), name='event-edit'),
     path('<int:pk>/', views.EventDetailView.as_view(), name='event-detail'),
     path('calendar/', views.EventOnCalendar.as_view(), name='calendar'),
+    path('<int:event_id>/<str:str>', views.AcceptInviteView.as_view(), name='event-invite'),
 ]
