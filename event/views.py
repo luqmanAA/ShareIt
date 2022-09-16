@@ -127,9 +127,9 @@ class EventOnCalendar(View):
 
     def get(self, request, *args, **kwargs):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
-        event = group.event_set.all()
+        events = group.event_set.all()
         context = {
-            'event': event
+            'events': events
         }
         return render(request, 'calendar/calendar.html', context)
 
@@ -144,6 +144,7 @@ class AcceptInviteView(GroupMixin, LoginRequiredMixin, View):
             event.confirmed_invitees.add(request.user)
         elif 'reject' in request.get_full_path():
             event.rejected_invitees.add(request.user)
+            event.save()
         elif 'tentative' in request.get_full_path():
             event.unconfirmed_invitees.add(request.user)
         event.save()
