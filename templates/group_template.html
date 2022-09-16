@@ -48,7 +48,7 @@
                         <div class="profile_info">
                             <h1> {{ group.name }} </h1>
                             <p> {{ group.privacy | title }} Group |
-{#                                <a href="{% url 'forum:members' group.slug %}">#}
+                                <a href="{% url 'forum:members' group.slug %}">
                                     {{ group.member.count }} members
                                 </a>
                             </p>
@@ -89,6 +89,8 @@
                 </div>
 
                 {% endblock %}
+
+                {% block group-content %}
 
                 {% block group-body %}
 
@@ -132,6 +134,7 @@
                     {% endblock %}
                 </div>
 
+            {% endblock %}
 
             </div>
 
