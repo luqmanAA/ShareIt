@@ -1326,3 +1326,11 @@ input[type="text"], textarea{
     padding-left: 0.75rem;
     padding-right: 0.75rem;
 }
+
+.fc-toolbar-title {
+  font-size: 1.2em !important;
+}
+
+.fc-daygrid-day {
+  height: 20px;
+}

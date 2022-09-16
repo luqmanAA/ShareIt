@@ -1,61 +1,43 @@
 
-{% extends 'event/calendar_base.html' %}
-{% block content %}
-<style>
+{% extends 'group_template.html' %}
 
-    td {
-        border-style: none;
-    }
-</style>
-    <div class="container-fluid">
-        <div class="row">
-            <div id="calendar" class="d-none d-md-flex col-md-4 col-lg-8 p-3"></div>
-            <div class="col-md-8 col-lg-4">
-                <div class="login d-flex py-3">
-                    <div class="container">
-
-                    </div>
-                </div>
+{% block group-content %}
+    <div class="" id="timeline-tab" style="touch-action: pan-y pinch-zoom;">
+        <div class="card lg:mx-0 uk-animation-slide-bottom-small visible-card lg:p-4 p-2.5">
+            <div class="card-header">
+                <h4>Events List</h4>
             </div>
-        </div>
-    </div> <div class="container-fluid">
-        <div class="row">
-            <div id="timeList" class="d-none d-md-flex col-md-4 col-lg-8 p-3"></div>
-            <div class="col-md-8 col-lg-4">
-
-            </div>
+            <div class="card-body" id='calendar'></div>
         </div>
     </div>
 
     <script>
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                themeSystem: 'bootstrap',
-                timeZone: 'Africa/Lagos',
-                locale: 'en',
-                firstDay: 1,
-                height: '100',
-                initialView: 'dayGridMonth',
-                //plugins: ['dayGrid', 'timeGrid', 'list', 'interaction'],
-                events: [
-                    {% for i in event %}
-                        {
-                            title: "{{ i.name }}",
-                            start: '{{ i.start_date_time|date:"Y-m-d"}}',
-                            end: '{{ i.end_date_time|date:"Y-m-d"}}',
-                            url: '{% url 'event:event-detail' i.id %}',
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
 
-                        },
-                    {% endfor %}
+            initialView: 'dayGridMonth',
+            timeZone: 'Africa/Lagos',
+            locale: 'en',
+            firstDay: 1,
+            events: [
+                {% for event in events %}
+                    {
+                        title: "{{ event.name }}",
+                        start: '{{ event.start_date_time.isoformat}}',
+                        end: '{{ event.end_date_time.isoformat}}',
+                        url: '{% url 'forum:event:event-detail' group.slug event.id %}',
 
-                ]
-            });
-            calendar.render();
-            let endDate = calendar.getEventById('e1').end
-            console.log(endDate.toISOString())
+                    },
+                {% endfor %}
+
+            ]
         });
+        calendar.render();
+      });
 
     </script>
-{% endblock content %}
+
+
+{% endblock %}
