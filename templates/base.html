@@ -127,30 +127,30 @@
                                 </div>
                             {% elif 'event' in  notification.description %}
                                 <div class="flex justify-content-around">
-                                    <form method="post" action="{% url 'forum:event:event-invite' notification.action_object.id 'accept' %}">
+                                    <form method="post" action="{% url 'forum:event:event-invite' notification.action_object.group.slug notification.action_object.id 'accept' %}">
                                         {% csrf_token %}
                                         <input type="hidden"
                                                name="next_url"
                                                value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
-                                        <button type="submit" class="h-9 px-3 rounded-md bg-blue-600 text-white small-txt">
+                                        <button type="submit" class="pl rounded-md bg-blue-600 text-white small-txt">
                                             Accept
                                         </button>
                                     </form>
-                                    <form method="post" action="{% url 'forum:event:event-invite' notification.action_object.id 'tentative' %}">
+                                    <form method="post" action="{% url 'forum:event:event-invite' notification.action_object.group.slug notification.action_object.id 'tentative' %}">
                                         {% csrf_token %}
                                         <input type="hidden"
                                                name="next_url"
                                                value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
-                                        <button type="submit" class="h-9 px-3 rounded-md bg-gray-200 text-white small-txt">
+                                        <button type="submit" class="pl rounded-md bg-gray-500 text-white small-txt">
                                             Maybe
                                         </button>
                                     </form>
-                                    <form method="post" action="{% url 'forum:event:event-invite' notification.action_object.id 'reject' %}">
+                                    <form method="get" action="{% url 'forum:event:event-invite' notification.action_object.group.slug notification.action_object.id 'reject' %}">
                                         {% csrf_token %}
                                         <input type="hidden"
                                                name="next_url"
                                                value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
-                                        <button type="submit" class="h-9 px-3 rounded-md bg-danger text-white small-txt">
+                                        <button type="submit" class="pl rounded-md bg-danger text-white small-txt">
                                             Decline
                                         </button>
                                     </form>
