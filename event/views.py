@@ -114,7 +114,7 @@ class EventOnCalendar(View):
 
 class AcceptInviteView(GroupMixin, LoginRequiredMixin, View):
 
-    def get(self, request, event_id, **kwargs):
+    def post(self, request, event_id, **kwargs):
         event = Event.objects.filter(
             id=event_id
         ).first()
@@ -126,8 +126,9 @@ class AcceptInviteView(GroupMixin, LoginRequiredMixin, View):
             event.unconfirmed_invitees.add(request.user)
         event.save()
 
+        next_url = request.POST.get('next_url', '')
         return HttpResponseRedirect(
-            request.META.get('HTTP_REFERRER')
+            next_url
         )
 
 
