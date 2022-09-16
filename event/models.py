@@ -33,7 +33,7 @@ class Event(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('event:event', args=[str('id')])
+        return reverse('event:event-detail', args=[str('id')])
 
 
 @receiver(pre_save, sender=Event)
