@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
+<head>
+    <title></title>
+    <style>
+        #po1{
+            font-size: 30px;
+        }
+    </style>
+</head>
 {% block content %}
     <div class="pagetitle">
         <h1>Event Creation Page</h1>
@@ -21,15 +29,34 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Create an event by filling out the form below:</h5>
-                        {% include "includes/alerts.html" %}
 
-                        <!-- General Form Elements -->
-                        <form method="post" action="">
-                            {% csrf_token %}
-                            {{ form|crispy }}
-                            <br>
-                            <button type="submit" class="btn btn-primary">Submit Form</button>
-                        </form><!-- End General Form Elements -->
+
+                         <div class="mx-auto p-4 flex flex-col">
+                            <div id="Post" class="">
+                              <h2 class="font-bold text-xl"></h2>
+                              <form class="" method="POST" enctype="multipart/form-data" action="">
+                                {% csrf_token %}
+                                <div class="w-full" id="po1">
+                                    <label>Title</label>
+                                  {{ form.name }}
+                                    <br>
+                                    <label>Description</label>
+                                    {{ form.description }}
+                                    <br>
+                                    <label>Time Start</label>
+                                    <input type="datetime-local" name="{{ form.start_date_time.name }}" placeholder="00:00">
+                                    <br>
+                                    <label>Time End</label>
+                                    <input type="datetime-local" name="{{ form.end_date_time.name }}" placeholder="00:00">
+                                    <br>
+                                    <label>Location</label>
+                                    {{ form.location }}
+                                    <br>
+                                  <button class="bg-blue-500 py-4 px-4 m-2 text-white" type="submit">Create Event</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
 
                     </div>
                 </div>
