@@ -1,17 +1,20 @@
 from datetime import datetime
 
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, reverse, redirect
-from django.urls import reverse_lazy
+from notifications.signals import notify
+
+from bootstrap_datepicker_plus.widgets import DateTimePickerInput
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, reverse, get_object_or_404
 from django.views.generic.edit import CreateView, View
 from django.views.generic import UpdateView, ListView, DetailView
 from django.utils import timezone
 
 from .models import Event
+from accounts.models import Account
 from forum.models import Group
 from forum.views import GroupMixin
-from forum.models import Membership
 
 
 class CreateEventView(GroupMixin, LoginRequiredMixin, CreateView):
@@ -24,11 +27,24 @@ class CreateEventView(GroupMixin, LoginRequiredMixin, CreateView):
         if form.is_valid():
             form.instance.host = self.request.user
             form.instance.group = group
+            form.instance.slug = form.instance.name
             form.save()
-            return super().form_valid(form)
 
-    def send_notification(self):
-        pass
+            content = f"You are invited to join {form.instance.name}"
+            group_members = group.member.filter(is_suspended=False)
+            members = Account.objects.filter(
+                group_membership__in=group_members
+            )
+            sender = self.request.user
+
+            notify.send(sender=sender,
+                        recipient=members,
+                        verb=content,
+                        action_object=form.instance,
+                        description='event invite',
+
+                        )
+            return super().form_valid(form)
 
     def get_success_url(self) -> str:
         return reverse('forum:event:event-list', args=[self.kwargs['slug']])
@@ -89,18 +105,33 @@ class EventDetailView(GroupMixin, LoginRequiredMixin, DetailView):
 class EventOnCalendar(View):
 
     def get(self, request, *args, **kwargs):
-        # group = Group.objects.filter(slug=self.kwargs['slug']).first()
-        event = Event.objects.all()
+        group = Group.objects.filter(slug=self.kwargs['slug']).first()
+        event = group.event_set.all()
         context = {
             'event': event
         }
         return render(request, 'calendar/calendar.html', context)
 
 
-class AcceptRejectInviteeView(GroupMixin, LoginRequiredMixin, View):
+class AcceptInviteView(GroupMixin, LoginRequiredMixin, View):
 
     def get(self, request, event_id, **kwargs):
-        pass
+        event = Event.objects.filter(
+            id=event_id
+        )
+        if 'accept' in request.get_full_path():
+            event.confirmed_invitees.add(request.user)
+        elif 'reject' in request.get_full_path():
+            event.rejected_invitees.add(request.user)
+        elif 'tentative' in request.get_full_path():
+            event.unconfirmed_invitees.add(request.user)
+        event.save()
+
+        return HttpResponseRedirect(
+            request.META.get('HTTP_REFERRER')
+        )
+
+
 
 
 

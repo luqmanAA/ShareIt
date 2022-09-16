@@ -46,6 +46,7 @@
                             title: "{{ i.name }}",
                             start: '{{ i.start_date_time|date:"Y-m-d"}}',
                             end: '{{ i.end_date_time|date:"Y-m-d"}}',
+                            url: '{% url 'event:event-detail' i.id %}',
 
                         },
                     {% endfor %}
