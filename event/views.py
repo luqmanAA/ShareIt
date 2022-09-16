@@ -74,20 +74,22 @@ class EventListView(GroupMixin, LoginRequiredMixin, ListView):
     def get(self, request, **kwargs):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
         if request.user not in group.admin.all():
-            event = group.event_set.all()
-            context = {
-                'event': event
-            }
-            return render(
-                request,
-                'calendar/calendar.html',
-                context=context
-            )
+            # event = group.event_set.all()
+            # context = super(EventListView, self).get()
+            # context['event'] = event
+            self.template_name = 'calendar/calendar.html'
+            self.context_object_name = 'events'
+            return super(EventListView, self).get(request, **kwargs)
+
         return super().get(request, **kwargs)
 
     def get_queryset(self):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
         self.records['group'] = group
+        if self.request.user not in group.admin.all():
+            return Event.objects.filter(
+                confirmed_invitees=self.request.user
+            )
         return Event.objects.filter(
             group=group
         )
@@ -117,7 +119,7 @@ class EventDetailView(GroupMixin, LoginRequiredMixin, DetailView):
     def get_context_data(self, *args, **kwargs):
         context = super(EventDetailView, self).get_context_data()
         context['confirmed_invitees']=self.get_object().confirmed_invitees
-        context['unconfirmed_invitees'] = self.get_object().confirmed_invitees
+        context['unconfirmed_invitees'] = self.get_object().unconfirmed_invitees
         context['invitees'] = self.get_object().group.member.all()
         return context
 

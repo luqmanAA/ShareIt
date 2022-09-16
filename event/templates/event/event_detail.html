@@ -45,9 +45,11 @@
                             </div>
                         </div>
                         <center>
-                        <a href="{% url 'forum:event:event-edit' event.group.slug event.pk %}">
-                        <button type="submit" class="btn btn-primary"> Edit </button>
-                        </a>
+                        {% if request.user in group.admin.all %}
+                            <a href="{% url 'forum:event:event-edit' event.group.slug event.pk %}">
+                            <button type="submit" class="btn btn-primary"> Edit </button>
+                            </a>
+                        {% endif %}
                         </center>
                     <br>
 
