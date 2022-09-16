@@ -517,12 +517,12 @@ h6 {
 .header-nav .notifications .notification-item {
   display: flex;
   align-items: center;
-  padding: 15px 10px;
+  padding: 10px 5px;
   transition: 0.3s;
 }
 
 .header-nav .notifications .notification-item i {
-  margin: 0 20px 0 10px;
+  margin: 0 10px 0 10px;
   font-size: 24px;
 }
 
@@ -701,8 +701,7 @@ h6 {
   font-size: 15px;
   font-weight: 600;
   color: #4154f1;
-  transition: 0.3;
-  background: #f6f9ff;
+  transition: 0.3s;
   padding: 10px 15px;
   border-radius: 4px;
 }
@@ -722,7 +721,7 @@ h6 {
   color: #899bbd;
 }
 
-.sidebar-nav .nav-link:hover {
+.sidebar-nav .nav-link:hover, .sidebar-nav .nav-item .active {
   color: #4154f1;
   background: #f6f9ff;
 }
@@ -1306,4 +1305,18 @@ input[type="text"]{
 
 .visible-card {
   overflow: visible;
+}
+
+.small-txt {
+  font-size: 11px;
+  margin-bottom: 0;
+}
+
+.no-mb-pb {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.profile .responsive-nav .active{
+  color: #4154f1;
 }
