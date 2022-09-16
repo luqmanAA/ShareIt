@@ -19,10 +19,12 @@ class Event(models.Model):
     location = models.CharField(max_length=300, verbose_name='Event Location')
     start_date_time = models.DateTimeField()
     end_date_time = models.DateTimeField()
-    Cover_image = models.ImageField(upload_to='upload/event', default='img/cover_bg.jfif')
-    members = models.ManyToManyField(Account, related_name='event_members')
-    confirmed_invitees = models.IntegerField(default=0)
-    unconfirmed_invitees = models.IntegerField(default=0)
+    Cover_image = models.ImageField(upload_to='upload/event/', default='img/cover_bg.jfif')
+    # members = models.ManyToManyField(Account, related_name='event_members')
+    confirmed_invitees = models.ManyToManyField(Account, related_name='confirmed_event')
+    rejected_invitees = models.ManyToManyField(Account, related_name='rejected_event')
+    unconfirmed_invitees = models.ManyToManyField(Account, related_name='tentative_event')
+
 
     class Meta:
         ordering = ('-start_date_time',)

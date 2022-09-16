@@ -25,7 +25,7 @@
                                 </a>
                                 <div class="flex-1 font-regular">
                                     <h5>
-                                        <a href="{% url 'accounts:dashboard' %}"
+                                        <a href="{% url 'accounts:profile_view' membership.id %}"
                                            class="text-black dark:text-gray-100">
                                             {% if membership.user.first_name %}
                                             {{ membership.user.first_name  | title}}

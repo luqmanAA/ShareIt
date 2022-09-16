@@ -10,4 +10,10 @@ def filter_query(value, arg):
     return False
 
 
+def latest_post(value):
+    return value.first()
+
+
 register.filter('filter_query', filter_query)
+register.filter('latest_post', latest_post)
+

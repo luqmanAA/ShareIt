@@ -1,0 +1,62 @@
+
+{% extends 'calendar_base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<style>
+
+    td {
+        border-style: none;
+    }
+</style>
+    <div class="container-fluid">
+        <div class="row">
+            <div id="calendar" class="d-none d-md-flex col-md-4 col-lg-8 p-3"></div>
+            <div class="col-md-8 col-lg-4">
+                <div class="login d-flex py-3">
+                    <div class="container">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <div class="container-fluid">
+        <div class="row">
+            <div id="timeList" class="d-none d-md-flex col-md-4 col-lg-8 p-3"></div>
+            <div class="col-md-8 col-lg-4">
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                themeSystem: 'bootstrap',
+                timeZone: 'Africa/Lagos',
+                locale: 'en',
+                firstDay: 1,
+                height: '100',
+                initialView: 'dayGridMonth',
+                //plugins: ['dayGrid', 'timeGrid', 'list', 'interaction'],
+                events: [
+                    {% for i in event %}
+                        {
+                            title: "{{ i.name }}",
+                            start: '{{ i.start_date_time|date:"Y-m-d"}}',
+                            end: '{{ i.end_date_time|date:"Y-m-d"}}',
+                            url: '{% url 'event:event-detail' i.id %}',
+
+                        },
+                    {% endfor %}
+
+                ]
+            });
+            calendar.render();
+            let endDate = calendar.getEventById('e1').end
+            console.log(endDate.toISOString())
+        });
+
+    </script>
+{% endblock content %}
