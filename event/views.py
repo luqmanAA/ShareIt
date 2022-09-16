@@ -68,6 +68,7 @@ class EditEventView(GroupMixin, LoginRequiredMixin, UpdateView):
 class EventListView(GroupMixin, LoginRequiredMixin, ListView):
     model = Event
     template_name = 'event/event_list.html'
+    paginate_by = 5
     records = {}
 
     def get_queryset(self):
@@ -116,7 +117,7 @@ class AcceptInviteView(GroupMixin, LoginRequiredMixin, View):
     def get(self, request, event_id, **kwargs):
         event = Event.objects.filter(
             id=event_id
-        )
+        ).first()
         if 'accept' in request.get_full_path():
             event.confirmed_invitees.add(request.user)
         elif 'reject' in request.get_full_path():
