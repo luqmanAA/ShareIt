@@ -1,8 +1,15 @@
 {% extends 'forum/group_template.html' %}
+{% load widget_tweaks %}
+
+
+    <style>
+        td {
+            border-style: none;}
+    </style>
+
 {% block group-body %}
     {% load static %}
 {#   <div class="card lg:mx-0 p-4" uk-toggle="target: #create-post-modal">#}
-
        <div class="grid grid-flow-col pt-3 -mx-1 -mb-1 font-semibold text-sm">
            <a href="{% url 'forum:event:create-event' group.slug %}">Create Event</a>
        </div>
@@ -22,15 +29,66 @@
                 <br>
                 </div>
                     {% for event in event_list %}
-                       <img src="{% static 'img/event_bg.png' %}" alt="">
-                        <h3>&nbsp;&nbsp;<a href="{% url 'forum:event:event-detail' event.group.slug event.id %}">{{ event.name }}</a></h3>
-                        <p>Start date: &nbsp;{{ event.start_date_time }}</p>
-                        <p>End date:&nbsp;{{ event.start_date_time }}</p>
-                        <p>&nbsp;<b>Hosted by</b> : {{ event.host.username|title }}</p>
-                        <br>
+                        {% if event.host_id == request.user.pk %}
+                           <img src="{% static 'img/event_bg.png' %}" alt="">
+                            <h3>&nbsp;&nbsp;<a href="{% url 'forum:event:event-detail' event.group.slug event.id %}">{{ event.name }}</a></h3>
+                            <p>Start date: &nbsp;{{ event.start_date_time }}</p>
+                            <p>End date:&nbsp;{{ event.start_date_time }}</p>
+                            <p>&nbsp;<b>Hosted by</b> : {{ event.host.username|title }}</p>
+                            <br>
+
+                        {% else %}
+
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div id="calendar" class="d-none d-md-flex col-md-4 col-lg-8 p-3"></div>
+                                        <div class="col-md-8 col-lg-4">
+                                            <div class="login d-flex py-3">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script>
+
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        var calendarEl = document.getElementById('calendar');
+                                        var calendar = new FullCalendar.Calendar(calendarEl, {
+                                            themeSystem: 'bootstrap',
+                                            timeZone: 'Africa/Lagos',
+                                            locale: 'en',
+                                            firstDay: 1,
+                                            height: '100',
+                                            initialView: 'dayGridMonth',
+                                            //plugins: ['dayGrid', 'timeGrid', 'list', 'interaction'],
+                                            events: [
+                                                {
+                                                    id: 'e1',
+                                                    title: 'event 1',
+                                                    start: '2022-09-15',
+                                                    end: '2022-09-17',
+                                                    url: "{% url 'event:event-detail' event.id %}",
+                                                },
+                                                {
+                                                    id: 'e2',
+                                                    title: 'Event 2',
+                                                    start: '2022-09-18',
+                                                    end: '2022-09-18'
+                                                }
+                                            ]
+                                        });
+                                        calendar.render();
+                                        let endDate = calendar.getEventById('e1').end
+                                        console.log(endDate.toISOString())
+                                    });
+
+                                </script>
+                        {% endif %}
+
                     {% empty %}
                         No Event
                     {% endfor %}
                 </div>
             </div>
+
 {% endblock %}
