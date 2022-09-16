@@ -58,7 +58,7 @@
                                 <form method="post" action="{% url 'forum:join-leave' group.slug request.user.id %}">
                                 {% csrf_token %}
                                 <button type="submit"
-                                   class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
+                                   class="flex items-center justify-center h-9 px-5 rounded-md bg-danger text-white  space-x-1.5">
                                     <span> Leave </span>
                                 </button>
                                 </form>
@@ -66,7 +66,7 @@
                                 <form method="post" action="{% url 'forum:reject_join_request' group.slug request.user.id %}">
                                 {% csrf_token %}
                                 <button type="submit"
-                                   class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-600 text-white  space-x-1.5">
+                                   class="flex items-center justify-center h-9 px-5 rounded-md bg-blue-400 text-white  space-x-1.5">
                                     <span> Cancel Request </span>
                                 </button>
                                 </form>
