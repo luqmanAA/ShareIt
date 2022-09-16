@@ -104,7 +104,7 @@
                         <div>
                             <p>
                                 {{ notification}}
-                            {% if notification.description %}
+                            {% if 'join' in  notification.description %}
                                 <div class="flex justify-content-around">
                                     <form method="post" action="{% url 'forum:approve_join_request' notification.action_object.slug notification.actor_object_id %}">
                                         {% csrf_token %}
@@ -122,6 +122,36 @@
                                                value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
                                         <button type="submit" class="h-9 px-3 rounded-md bg-gray-500 text-white small-txt">
                                             Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            {% elif 'event' in  notification.description %}
+                                <div class="flex justify-content-around">
+                                    <form method="post" action="{% url 'forum:event:event-invite' notification.action_object.id 'accept' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden"
+                                               name="next_url"
+                                               value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
+                                        <button type="submit" class="h-9 px-3 rounded-md bg-blue-600 text-white small-txt">
+                                            Accept
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'forum:event:event-invite' notification.action_object.id 'tentative' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden"
+                                               name="next_url"
+                                               value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
+                                        <button type="submit" class="h-9 px-3 rounded-md bg-gray-200 text-white small-txt">
+                                            Maybe
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'forum:event:event-invite' notification.action_object.id 'reject' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden"
+                                               name="next_url"
+                                               value="{% url 'notifications:mark_as_read' notification.slug %}?next={{request.path}}">
+                                        <button type="submit" class="h-9 px-3 rounded-md bg-danger text-white small-txt">
+                                            Decline
                                         </button>
                                     </form>
                                 </div>
