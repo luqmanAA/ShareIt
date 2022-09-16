@@ -3,8 +3,6 @@ from datetime import datetime
 from django.http import HttpResponseRedirect
 from notifications.signals import notify
 
-from bootstrap_datepicker_plus.widgets import DateTimePickerInput
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, reverse, get_object_or_404
 from django.views.generic.edit import CreateView, View
