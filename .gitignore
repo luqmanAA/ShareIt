@@ -5,3 +5,4 @@ __pycache__/
 forum/migrations
 polls/migrations
 event/migrations
+credentials.json
