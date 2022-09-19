@@ -29,8 +29,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Create an event by filling out the form below:</h5>
-
-                            {% include 'includes/alerts.html' %}
+                        <p class="text-danger">{{ form.non_field_errors }}</p>
                          <div class="mx-auto p-4 flex flex-col">
                             <div id="Post" class="">
                               <h2 class="font-bold text-xl"></h2>
