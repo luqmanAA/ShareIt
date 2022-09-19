@@ -20,8 +20,7 @@ class PollListVIew(GroupMixin, generic.ListView):
     template_name = 'polls/polls_list.html'
 
     def get_queryset(self):
-        group = Group.objects.filter(slug=self.kwargs['slug']).first()
-        return Poll.objects.filter(group=group).order_by("-created_date")
+        return Poll.objects.filter(group=self.group).order_by("-created_date")
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PollListVIew, self).get_context_data(**kwargs)
