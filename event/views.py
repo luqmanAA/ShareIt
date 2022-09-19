@@ -1,57 +1,52 @@
 from datetime import datetime
 
-from django.contrib import messages
 from django.http import HttpResponseRedirect
 from notifications.signals import notify
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, reverse, get_object_or_404
-from django.views.generic.edit import CreateView, View
+from django.views.generic.edit import CreateView,FormView, View
 from django.views.generic import UpdateView, ListView, DetailView
 from django.utils import timezone
-
-from .models import Event
-from .calendar_api import sync_event
 
 from accounts.models import Account
 from forum.models import Group
 from forum.views import GroupMixin
 
+from .calendar_api import sync_event
+from .form import EventCreation
+from .models import Event
 
-class CreateEventView(GroupMixin, LoginRequiredMixin, CreateView):
+
+class CreateEventView(GroupMixin, LoginRequiredMixin, FormView):
     model = Event
     template_name = 'event/event_create_form.html'
-    fields = ('name', 'location', 'Cover_image', 'description', 'start_date_time', 'end_date_time')
+    form_class = EventCreation
 
     def form_valid(self, form):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
-        self.object = self.get_object()
-        if self.object.start_time_date < timezone.now():
-            messages.error(self.request, "You can't specify pass date")
-        else:
-            if form.is_valid():
-                form.instance.host = self.request.user
-                form.instance.group = group
-                form.instance.slug = form.instance.name
-                form.save()
+        form.instance.host = self.request.user
+        form.instance.group = group
+        form.instance.slug = form.instance.name
+        form.save()
 
-                content = f"You are invited to join {form.instance.name}"
-                group_members = group.member.filter(is_suspended=False).exclude(
-                    user_id=self.request.user.id
-                )
-                members = Account.objects.filter(
-                    group_membership__in=group_members
-                )
-                sender = self.request.user
+        content = f"You are invited to join {form.instance.name}"
+        group_members = group.member.filter(is_suspended=False).exclude(
+            user_id=self.request.user.id
+        )
+        members = Account.objects.filter(
+            group_membership__in=group_members
+        )
+        sender = self.request.user
 
-                notify.send(sender=sender,
-                            recipient=members,
-                            verb=content,
-                            action_object=form.instance,
-                            description='event invite',
+        notify.send(sender=sender,
+                    recipient=members,
+                    verb=content,
+                    action_object=form.instance,
+                    description='event invite',
 
-                            )
-                return super().form_valid(form)
+                    )
+        return super().form_valid(form)
 
     def get_success_url(self) -> str:
         return reverse('forum:event:event-list', args=[self.kwargs['slug']])
