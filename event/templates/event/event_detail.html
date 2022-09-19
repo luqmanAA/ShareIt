@@ -15,18 +15,41 @@
                         <center>
                             <h3>{{ event.name }}</h3>
                         </center>
-                        <br>
-                        <p>Start date :{{ event.start_date_time|date }}</p>
-                        <p>Start time :{{ event.start_date_time|time }}</p>
-                        <p>End date :{{ event.end_date_time|date }}</p>
-                        <p>End time :{{ event.end_date_time|time }}</p>
-                        <p>Hosted by : {{ event.host }}</p>
-                        <br>
-                        <p>Event description :{{ event.description }}</p>
+                        <div class="ml-3">
+                            <br>
+                            <p>Start date :{{ event.start_date_time|date }}</p>
+                            <p>Start time :{{ event.start_date_time|time }}</p>
+                            <p>End date :{{ event.end_date_time|date }}</p>
+                            <p>End time :{{ event.end_date_time|time }}</p>
+                            <p>Hosted by : {{ event.host }}</p>
+                            <br>
+                            <p>Event description :{{ event.description }}</p>
+                        </div>
+                        <div class="row flex justify-content-between mb-5 mt-3">
+                            <div>
+                                <h5>Guest List</h5>
+                            </div>
+                            <div class="col-3 text-center">
+                                <p class="mb-0 {% if confirmed_invitees.count > 1 %}text-success{% endif %}">
+                                    {{ confirmed_invitees.count }}
+                                </p>
+                                <h6>Coming</h6>
+                            </div>
+                            <div class="col-3 text-center">
+                                <p class="mb-0">{{ unconfirmed_invitees.count }}</p>
+                                <h6>Maybe</h6>
+                            </div>
+                            <div class="col-3 text-center">
+                                <p class="mb-0">{{ invitees.count }}</p>
+                                <h6>Invited</h6>
+                            </div>
+                        </div>
                         <center>
-                        <a href="{% url 'forum:event:event-edit' event.group.slug event.pk %}">
-                        <button type="submit" class="btn btn-primary"> Edit </button>
-                        </a>
+                        {% if request.user in group.admin.all %}
+                            <a href="{% url 'forum:event:event-edit' event.group.slug event.pk %}">
+                            <button type="submit" class="btn btn-primary"> Edit </button>
+                            </a>
+                        {% endif %}
                         </center>
                     <br>
 

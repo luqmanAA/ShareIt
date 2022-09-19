@@ -68,11 +68,28 @@ class EditEventView(GroupMixin, LoginRequiredMixin, UpdateView):
 class EventListView(GroupMixin, LoginRequiredMixin, ListView):
     model = Event
     template_name = 'event/event_list.html'
+    paginate_by = 5
     records = {}
+
+    def get(self, request, **kwargs):
+        group = Group.objects.filter(slug=self.kwargs['slug']).first()
+        if request.user not in group.admin.all():
+            # event = group.event_set.all()
+            # context = super(EventListView, self).get()
+            # context['event'] = event
+            self.template_name = 'calendar/calendar.html'
+            self.context_object_name = 'events'
+            return super(EventListView, self).get(request, **kwargs)
+
+        return super().get(request, **kwargs)
 
     def get_queryset(self):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
         self.records['group'] = group
+        if self.request.user not in group.admin.all():
+            return Event.objects.filter(
+                confirmed_invitees=self.request.user
+            )
         return Event.objects.filter(
             group=group
         )
@@ -99,34 +116,43 @@ class EventDetailView(GroupMixin, LoginRequiredMixin, DetailView):
     model = Event
     template_name = 'event/event_detail.html'
 
+    def get_context_data(self, *args, **kwargs):
+        context = super(EventDetailView, self).get_context_data()
+        context['confirmed_invitees']=self.get_object().confirmed_invitees
+        context['unconfirmed_invitees'] = self.get_object().unconfirmed_invitees
+        context['invitees'] = self.get_object().group.member.all()
+        return context
+
 
 class EventOnCalendar(View):
 
     def get(self, request, *args, **kwargs):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
-        event = group.event_set.all()
+        events = group.event_set.all()
         context = {
-            'event': event
+            'events': events
         }
         return render(request, 'calendar/calendar.html', context)
 
 
 class AcceptInviteView(GroupMixin, LoginRequiredMixin, View):
 
-    def get(self, request, event_id, **kwargs):
+    def post(self, request, event_id, **kwargs):
         event = Event.objects.filter(
             id=event_id
-        )
+        ).first()
         if 'accept' in request.get_full_path():
             event.confirmed_invitees.add(request.user)
         elif 'reject' in request.get_full_path():
             event.rejected_invitees.add(request.user)
+            event.save()
         elif 'tentative' in request.get_full_path():
             event.unconfirmed_invitees.add(request.user)
         event.save()
 
+        next_url = request.POST.get('next_url', '')
         return HttpResponseRedirect(
-            request.META.get('HTTP_REFERRER')
+            next_url
         )
 
 

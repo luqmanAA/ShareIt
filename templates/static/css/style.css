@@ -1281,8 +1281,9 @@ h6 {
   display: none;
 }
 
-input[type="text"]{
+input[type="text"], textarea{
   border: 1px solid #ccc;
+  outline: 1px solid #ccc;
 }
 
 .options a {
@@ -1319,4 +1320,17 @@ input[type="text"]{
 
 .profile .responsive-nav .active{
   color: #4154f1;
+}
+
+.pl {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.fc-toolbar-title {
+  font-size: 1.2em !important;
+}
+
+.fc-daygrid-day {
+  height: 20px;
 }

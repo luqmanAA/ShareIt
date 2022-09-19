@@ -130,12 +130,19 @@ class JoinLeaveGroupView(LoginRequiredMixin, View):
         group = Group.objects.filter(slug=slug).first()
         sender = self.request.user
         if group.member.filter(user_id=pk).exists():
-            group.admin.remove(request.user)
-            Membership.objects.filter(user_id=pk).delete()
-            messages.error(
-                request,
-                f"You're no longer a member {group.name}"
-            )
+            if request.user in group.admin.all() and group.admin.count() <= 1:
+                messages.error(
+                    request,
+                    f"You cannot leave the group because you're the only admin,"
+                    f" make someone else admin before leaving."
+                )
+            else:
+                group.admin.remove(request.user)
+                Membership.objects.filter(user_id=pk).delete()
+                messages.error(
+                    request,
+                    f"You're no longer a member {group.name}"
+                )
         elif group.privacy == "private":
             Membership.objects.create(
                 user_id=pk,

@@ -26,7 +26,7 @@ class PollListVIew(GroupMixin, generic.ListView):
         context = super(PollListVIew, self).get_context_data(**kwargs)
         votes = Vote.objects.filter(voter=self.request.user)
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
-        poll = Poll.objects.filter(group=group).first().start_date
+        # poll = Poll.objects.filter(group=group).first().start_date
         context["votes"] = votes
         context["slug"] = self.kwargs['slug']
         context["current_date"] = date.today()
