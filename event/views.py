@@ -123,6 +123,7 @@ class EventDetailView(GroupMixin, LoginRequiredMixin, DetailView):
         context['invitees'] = self.get_object().group.member.all()
         return context
 
+
 class EventOnCalendar(View):
 
     def get(self, request, *args, **kwargs):
