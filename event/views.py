@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib import messages
 from django.http import HttpResponseRedirect
 from notifications.signals import notify
 
@@ -24,27 +25,33 @@ class CreateEventView(GroupMixin, LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         group = Group.objects.filter(slug=self.kwargs['slug']).first()
-        if form.is_valid():
-            form.instance.host = self.request.user
-            form.instance.group = group
-            form.instance.slug = form.instance.name
-            form.save()
+        self.object = self.get_object()
+        if self.object.start_time_date < timezone.now():
+            messages.error(self.request, "You can't specify pass date")
+        else:
+            if form.is_valid():
+                form.instance.host = self.request.user
+                form.instance.group = group
+                form.instance.slug = form.instance.name
+                form.save()
 
-            content = f"You are invited to join {form.instance.name}"
-            group_members = group.member.filter(is_suspended=False)
-            members = Account.objects.filter(
-                group_membership__in=group_members
-            )
-            sender = self.request.user
+                content = f"You are invited to join {form.instance.name}"
+                group_members = group.member.filter(is_suspended=False).exclude(
+                    user_id=self.request.user.id
+                )
+                members = Account.objects.filter(
+                    group_membership__in=group_members
+                )
+                sender = self.request.user
 
-            notify.send(sender=sender,
-                        recipient=members,
-                        verb=content,
-                        action_object=form.instance,
-                        description='event invite',
+                notify.send(sender=sender,
+                            recipient=members,
+                            verb=content,
+                            action_object=form.instance,
+                            description='event invite',
 
-                        )
-            return super().form_valid(form)
+                            )
+                return super().form_valid(form)
 
     def get_success_url(self) -> str:
         return reverse('forum:event:event-list', args=[self.kwargs['slug']])
