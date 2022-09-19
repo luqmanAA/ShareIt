@@ -27,7 +27,7 @@ class Event(models.Model):
 
 
     class Meta:
-        ordering = ('-start_date_time',)
+        ordering = ('-end_date_time',)
 
     def __str__(self):
         return self.name

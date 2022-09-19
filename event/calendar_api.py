@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import datetime
 import os.path
 
 from google.auth.transport.requests import Request
@@ -29,26 +28,23 @@ def sync_event(event):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'helpers/credentials.json', SCOPES)
+                'event/helpers/credentials.json', SCOPES)
             flow.redirect_uri = 'http://localhost:8080/'
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+        # with open('token.json', 'a+') as token:
+        #     token.write(creds.to_json())
 
     try:
         service = build('calendar', 'v3', credentials=creds)
         event = {
             'summary': event.name,  # event's title
-            'location': event.location,  # event's location
             'description': event.description,  # event's description
             'start': {
-                'dateTime': event.start_date_time,
-                'timeZone': 'Africa/Lagos',
+                'dateTime': event.start_date_time.isoformat(),
             },  # event's start date/time with timezone
             'end': {
-                'dateTime': event.end_date_time,
-                'timeZone': 'Africa/Lagos',
+                'dateTime': event.end_date_time.isoformat(),
             },  # event's end date/time with timezone
             'reminders': {
                 'useDefault': False,
