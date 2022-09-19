@@ -10,6 +10,8 @@ from django.views.generic import UpdateView, ListView, DetailView
 from django.utils import timezone
 
 from .models import Event
+from .calendar_api import sync_event
+
 from accounts.models import Account
 from forum.models import Group
 from forum.views import GroupMixin
@@ -143,6 +145,7 @@ class AcceptInviteView(GroupMixin, LoginRequiredMixin, View):
         ).first()
         if 'accept' in request.get_full_path():
             event.confirmed_invitees.add(request.user)
+            sync_event(event)
         elif 'reject' in request.get_full_path():
             event.rejected_invitees.add(request.user)
             event.save()
