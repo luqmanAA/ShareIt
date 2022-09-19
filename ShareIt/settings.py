@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-!vng8k6#iz$-&_22a2s8!k+-zu8p+db3keiu-rsa0k3x*hg7y$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 DATE_INPUT_FORMATS = ['%d-%m-%Y']
 
 

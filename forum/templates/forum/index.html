@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
     {% load forum_tags %}
@@ -12,16 +13,40 @@
         </nav>
     </div><!-- End Page Title -->
     <section class="section dashboard">
-        <div class="row">
-            {% for group in group_feed %}
-                {% for post in group.posts.all|slice:":1" %}
-                    <h3>{{ group.name }}</h3>
-                    <p>{{ post.content | truncatewords:10 }}</p>
-                    {% if post.attachement %}
-                    <img src="{{ post.attachment.url }}">
-                    {% endif %}
+        <div class="row justify-content-center">
+            <div class="card col-6">
+                <div class="card-body">
+                {% for group in group_feed %}
+                    {% for post in group.posts.all|slice:":1" %}
+                        <div class="space-x-4">
+                            <div class="flex flex-1 items-center ">
+                                <a href="{% url 'forum:group-detail' group.slug %}">
+                                    <img src="{% static 'img/avatar-2.jpg' %}"
+                                         class="bg-gray-200 border border-white rounded-full w-10 h-10">
+                                </a>
+                                <div class="mx-2">
+                                    <a href="{% url 'forum:group-detail' group.slug %}">
+                                        <h5 class="card-title no-mb-pb">{{ group.name }}</h5>
+                                    </a>
+                                    <h6 class="card-subtitle mb-2 text-muted">
+                                        {% if post.author.first_name %}
+                                        {{ post.author.first_name }} {{ post.author.first_name }}
+                                        {% else %}
+                                        {{ post.author.username }}
+                                        {% endif %}
+                                    </h6>
+                                </div>
+
+                            </div>
+                        </div>
+                        <p>{{ post.content | truncatewords:10 }}</p>
+                        {% if post.attachement %}
+                        <img src="{{ post.attachment.url }}">
+                        {% endif %}
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
+                </div>
+            </div>
         </div>
     </section>
 {% endblock %}
